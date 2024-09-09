@@ -151,8 +151,8 @@ const dataset = [{"key": "จบสกอร์", "value": 18, "position": "ST"}
     "key": "จบสกอ",
     "value": 7,
     "position": "CAM"
-}, {"key": "ยืิงไกล", "value": 5, "position": "CAM"}, {
-    "key": "ส่ปีดต้น",
+}, {"key": "ยิงไกลไกล", "value": 5, "position": "CAM"}, {
+    "key": "สปีดต้น",
     "value": 4,
     "position": "CAM"
 }, {"key": "ส่งไกล", "value": 4, "position": "CAM"}, {
