@@ -6,7 +6,7 @@ const InputForm = ({ statusPlayers, onInputChange, inputs }) => {
         <Form.Group>
             {statusPlayers.map((player, index) => (
                 <div key={index}>
-                    <Form.Label>{`${player.key} (${player.value})`}</Form.Label>
+                    <Form.Label>{`${player.key} (ตัวคูณ : ${player.value})`}</Form.Label>
                     <Form.Control
                         name={player.key}
                         type="number"
