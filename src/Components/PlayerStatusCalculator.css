@@ -1,0 +1,8 @@
+/* เพิ่ม Box Panel และเงาสำหรับ "เลือกตำแหน่ง" และ "กรอกข้อมูลตำแหน่ง" */
+.box-shadow-container {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 30px;
+}
