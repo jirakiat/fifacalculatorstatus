@@ -394,7 +394,7 @@ function PlayerStatusCalculator() {
                 {/* Box Panel สำหรับกรอกข้อมูลตำแหน่ง */}
                 <Col md={8}>
                     <div className="box-shadow-container">
-                        <h5>กรอกข้อมูลตำแหน่ง: {selectedPosition}</h5>
+                        <h5>ตำแหน่ง: {selectedPosition}</h5>
                         {selectedPosition && (
                             <Form>
                                 <InputForm statusPlayers={filteredPlayers} onInputChange={handleInputChange} inputs={inputs} />
