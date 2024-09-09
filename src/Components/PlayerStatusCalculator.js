@@ -15,6 +15,7 @@ const positionColors = {
     'LM/RM': '#4FC3F7', // สีฟ้าอ่อนสำหรับปีก
     CB: '#7986CB', // สีม่วงน้ำเงินสำหรับกองหลังตัวกลาง
     'LB/RB': '#FFB74D', // สีส้มอ่อนสำหรับฟูลแบ็ค
+    'LWB/RWB': '#f5cb91', // สีส้มอ่อนสำหรับฟูลแบ็ค
     GK: '#FFD54F', // สีเหลืองอ่อนสำหรับผู้รักษาประตู
 };
 
@@ -361,7 +362,7 @@ function PlayerStatusCalculator() {
                         </div>
                         <div className="mb-4">
                             <h6>กองหลัง (Defenders)</h6>
-                            {['CB', 'LB/RB'].map((position) => (
+                            {['CB', 'LB/RB', 'LWB/RWB'].map((position) => (
                                 <Card
                                     key={position}
                                     onClick={() => handlePositionSelect(position)}
