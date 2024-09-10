@@ -307,11 +307,16 @@ function PlayerStatusCalculator() {
     const filteredPlayers = dataset.filter(player => player.position === selectedPosition);
 
     return (
-        <Container fluid style={{ backgroundColor: '#f8f9fa', minHeight: '100vh', padding: '20px', fontFamily: 'Kanit, sans-serif' }}>
+        <Container fluid style={{
+            backgroundColor: '#f8f9fa',
+            minHeight: '100vh',
+            padding: '20px',
+            fontFamily: 'Kanit, sans-serif'
+        }}>
             <Row className="mb-3 justify-content-center">
                 {/* แสดงผลลัพธ์ด้านบนในรูปแบบ Scoreboard */}
                 <Col md={6}>
-                    <ResultDisplay calculatedValue={calculatedValue} />
+                    <ResultDisplay calculatedValue={calculatedValue}/>
                 </Col>
             </Row>
 
@@ -327,7 +332,11 @@ function PlayerStatusCalculator() {
                                     key={position}
                                     onClick={() => handlePositionSelect(position)}
                                     className="mb-3"
-                                    style={{ backgroundColor: positionColors[position], color: 'white', cursor: 'pointer' }}
+                                    style={{
+                                        backgroundColor: positionColors[position],
+                                        color: 'white',
+                                        cursor: 'pointer'
+                                    }}
                                 >
                                     <Card.Body>
                                         <Card.Title>{position}</Card.Title>
@@ -342,7 +351,11 @@ function PlayerStatusCalculator() {
                                     key={position}
                                     onClick={() => handlePositionSelect(position)}
                                     className="mb-3"
-                                    style={{ backgroundColor: positionColors[position], color: 'white', cursor: 'pointer' }}
+                                    style={{
+                                        backgroundColor: positionColors[position],
+                                        color: 'white',
+                                        cursor: 'pointer'
+                                    }}
                                 >
                                     <Card.Body>
                                         <Card.Title>{position}</Card.Title>
@@ -357,7 +370,11 @@ function PlayerStatusCalculator() {
                                     key={position}
                                     onClick={() => handlePositionSelect(position)}
                                     className="mb-3"
-                                    style={{ backgroundColor: positionColors[position], color: 'white', cursor: 'pointer' }}
+                                    style={{
+                                        backgroundColor: positionColors[position],
+                                        color: 'white',
+                                        cursor: 'pointer'
+                                    }}
                                 >
                                     <Card.Body>
                                         <Card.Title>{position}</Card.Title>
@@ -372,7 +389,11 @@ function PlayerStatusCalculator() {
                                     key={position}
                                     onClick={() => handlePositionSelect(position)}
                                     className="mb-3"
-                                    style={{ backgroundColor: positionColors[position], color: 'white', cursor: 'pointer' }}
+                                    style={{
+                                        backgroundColor: positionColors[position],
+                                        color: 'white',
+                                        cursor: 'pointer'
+                                    }}
                                 >
                                     <Card.Body>
                                         <Card.Title>{position}</Card.Title>
@@ -386,7 +407,7 @@ function PlayerStatusCalculator() {
                                 key={'GK'}
                                 onClick={() => handlePositionSelect('GK')}
                                 className="mb-3"
-                                style={{ backgroundColor: positionColors['GK'], color: 'white', cursor: 'pointer' }}
+                                style={{backgroundColor: positionColors['GK'], color: 'white', cursor: 'pointer'}}
                             >
                                 <Card.Body>
                                     <Card.Title>GK</Card.Title>
@@ -402,7 +423,8 @@ function PlayerStatusCalculator() {
                         <h5>ตำแหน่ง: {selectedPosition}</h5>
                         {selectedPosition && (
                             <Form>
-                                <InputForm statusPlayers={filteredPlayers} onInputChange={handleInputChange} inputs={inputs} />
+                                <InputForm statusPlayers={filteredPlayers} onInputChange={handleInputChange}
+                                           inputs={inputs}/>
                                 <Button onClick={calculateStatus} className="mt-3">คำนวนค่าสเตตัสนักเตะ</Button>
                             </Form>
                         )}
@@ -416,6 +438,13 @@ function PlayerStatusCalculator() {
                     </div>
                 </Col>
             </Row>
+            <div style={{position: 'fixed', bottom: '20px', right: '20px', zIndex: 1000}}>
+                <img src='populu.png' alt="Logo" style={{width: '100px', cursor: 'pointer'}}
+                     onClick={() => window.open('https://www.youtube.com/@poppulu', '_blank')}
+
+                     />
+            </div>
+
         </Container>
     );
 }
