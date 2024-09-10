@@ -290,13 +290,18 @@ function PlayerStatusCalculator() {
     };
 
     // ฟังก์ชันการคำนวณผลลัพธ์
-    const calculateStatus = () => {
+    function calculateStatus() {
         let total = 0;
         dataset.filter(player => player.position === selectedPosition).forEach(player => {
-            total += (inputs[player.key] ? parseFloat(inputs[player.key]) : 0) * player.value;
+            const mainValue = inputs[player.key] ? parseFloat(inputs[player.key]) : 0;
+            const tcValue = inputs[`TC_${player.key}`] ? parseFloat(inputs[`TC_${player.key}`]) : 0;
+
+            // รวมค่า input หลักและค่า TC
+            total += (mainValue + tcValue) * player.value;
         });
         setCalculatedValue(total / 100);
-    };
+    }
+
 
     // กรองข้อมูลสถานะของผู้เล่นที่ตรงกับตำแหน่งที่เลือก
     const filteredPlayers = dataset.filter(player => player.position === selectedPosition);
