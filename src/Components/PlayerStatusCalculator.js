@@ -20,255 +20,643 @@ const positionColors = {
 };
 
 // ข้อมูลสถานะของผู้เล่นตามตำแหน่ง (ว่างเปล่า)
-const dataset = [{"key": "จบสกอร์", "value": 18, "position": "ST"}, {
-    "key": "ยืนตำแหน่ง",
-    "value": 13,
-    "position": "ST"
-}, {"key": "ควบคุมบอล", "value": 10, "position": "ST"}, {
-    "key": "พลังการยิง",
-    "value": 10,
-    "position": "ST"
-}, {"key": "โหม่งบอล", "value": 10, "position": "ST"}, {
-    "key": "ปฏิกิริยา",
-    "value": 8,
-    "position": "ST"
-}, {"key": "เลี้ยงบอล", "value": 7, "position": "ST"}, {
-    "key": "แข็งแกร่ง",
-    "value": 5,
-    "position": "ST"
-}, {"key": "ความเร็ว", "value": 5, "position": "ST"}, {
-    "key": "ส่งสั้น",
-    "value": 5,
-    "position": "ST"
-}, {"key": "สปีดต้น", "value": 4, "position": "ST"}, {"key": "ยิงไกล", "value": 3, "position": "ST"}, {
-    "key": "วอลเล่",
-    "value": 2,
-    "position": "ST"
-}, {"key": "ควบคุมบอล", "value": 15, "position": "CF"}, {
-    "key": "เลี้ยงบอล",
-    "value": 14,
-    "position": "CF"
-}, {"key": "ยืนตำแหน่ง", "value": 13, "position": "CF"}, {
-    "key": "จบสกอร์",
-    "value": 11,
-    "position": "CF"
-}, {"key": "ปฏิกิริยา", "value": 9, "position": "CF"}, {
-    "key": "ส่งสั้น",
-    "value": 9,
-    "position": "CF"
-}, {"key": "อ่านเกมส์", "value": 8, "position": "CF"}, {
-    "key": "พลังการยิง",
-    "value": 5,
-    "position": "CF"
-}, {"key": "ความเร็ว", "value": 5, "position": "CF"}, {
-    "key": "สปีดต้น",
-    "value": 5,
-    "position": "CF"
-}, {"key": "ยิงไกล", "value": 4, "position": "CF"}, {
-    "key": "โหม่งบอล",
-    "value": 2,
-    "position": "CF"
-}, {"key": "เลี้ยงบอล", "value": 16, "position": "LW/RW"}, {
-    "key": "ควบคุมบอล",
-    "value": 14,
-    "position": "LW/RW"
-}, {"key": "จบสกอร์", "value": 10, "position": "LW/RW"}, {
-    "key": "ยืนตำแหน่ง",
-    "value": 9,
-    "position": "LW/RW"
-}, {"key": "ส่งสั้น", "value": 9, "position": "LW/RW"}, {
-    "key": "เปิดบอล",
-    "value": 9,
-    "position": "LW/RW"
-}, {"key": "ปฏิกิริยา", "value": 7, "position": "LW/RW"}, {
-    "key": "สปีดต้น",
-    "value": 7,
-    "position": "LW/RW"
-}, {"key": "อ่านเกมส์", "value": 6, "position": "LW/RW"}, {
-    "key": "ความเร็ว",
-    "value": 6,
-    "position": "LW/RW"
-}, {"key": "ยิงไกล", "value": 4, "position": "LW/RW"}, {
-    "key": "คล่องตัว",
-    "value": 3,
-    "position": "LW/RW"
-}, {"key": "ส่งสั้น", "value": 14, "position": "CDM"}, {
-    "key": "เข้้าสกัด",
-    "value": 14,
-    "position": "CDM"
-}, {"key": "เข้าปะทะ", "value": 12, "position": "CDM"}, {
-    "key": "ควบคุมบอล",
-    "value": 10,
-    "position": "CDM"
-}, {"key": "ส่งไกล", "value": 10, "position": "CDM"}, {
-    "key": "ประกบตัว",
-    "value": 9,
-    "position": "CDM"
-}, {"key": "ปฏิกิริยา", "value": 7, "position": "CDM"}, {
-    "key": "ความอึด",
-    "value": 6,
-    "position": "CDM"
-}, {"key": "สไลด์", "value": 5, "position": "CDM"}, {"key": "ดุดัน", "value": 5, "position": "CDM"}, {
-    "key": "อ่านเกม",
-    "value": 4,
-    "position": "CDM"
-}, {"key": "แข็งแกร่ง", "value": 4, "position": "CDM"}, {
-    "key": "ส่งสั้น",
-    "value": 17,
-    "position": "CM"
-}, {"key": "ควบคุมบอล", "value": 14, "position": "CM"}, {
-    "key": "อ่านเกมส์",
-    "value": 13,
-    "position": "CM"
-}, {"key": "ส่งไกล", "value": 13, "position": "CM"}, {
-    "key": "ปฏิกิริยา",
-    "value": 8,
-    "position": "CM"
-}, {"key": "เลี้ยงบอล", "value": 7, "position": "CM"}, {
-    "key": "ยืิืนตำแหน่ง",
-    "value": 6,
-    "position": "CM"
-}, {"key": "ความอึด", "value": 6, "position": "CM"}, {
-    "key": "เข้าปะทะ",
-    "value": 5,
-    "position": "CM"
-}, {"key": "เข้้าสกัด", "value": 5, "position": "CM"}, {
-    "key": "ยืิิงไกล",
-    "value": 4,
-    "position": "CM"
-}, {"key": "จบสกอ", "value": 2, "position": "CM"}, {
-    "key": "ส่งสั้น",
-    "value": 16,
-    "position": "CAM"
-}, {"key": "ควบคุมบอล", "value": 15, "position": "CAM"}, {
-    "key": "อ่านเกมส์",
-    "value": 14,
-    "position": "CAM"
-}, {"key": "เลี้ยงบอล", "value": 13, "position": "CAM"}, {
-    "key": "ยืนตำแหน่ง",
-    "value": 9,
-    "position": "CAM"
-}, {"key": "ปฏิกิริยา", "value": 7, "position": "CAM"}, {
-    "key": "จบสกอ",
-    "value": 7,
-    "position": "CAM"
-}, {"key": "ยิงไกลไกล", "value": 5, "position": "CAM"}, {
-    "key": "สปีดต้น",
-    "value": 4,
-    "position": "CAM"
-}, {"key": "ส่งไกล", "value": 4, "position": "CAM"}, {
-    "key": "ความเร็ว",
-    "value": 3,
-    "position": "CAM"
-}, {"key": "คล่องตัว", "value": 3, "position": "CAM"}, {
-    "key": "เลี้ยงบอล",
-    "value": 15,
-    "position": "LM/RM"
-}, {"key": "ควบคุมบอล", "value": 13, "position": "LM/RM"}, {
-    "key": "ส่งสั้น",
-    "value": 11,
-    "position": "LM/RM"
-}, {"key": "เปิดบอล", "value": 10, "position": "LM/RM"}, {
-    "key": "ยืนตำแหน่ง",
-    "value": 8,
-    "position": "LM/RM"
-}, {"key": "ปฏิกิริยา", "value": 7, "position": "LM/RM"}, {
-    "key": "สปีดต้น",
-    "value": 7,
-    "position": "LM/RM"
-}, {"key": "อ่านเกม", "value": 7, "position": "LM/RM"}, {
-    "key": "จบสกอร์",
-    "value": 6,
-    "position": "LM/RM"
-}, {"key": "ความเร็ว", "value": 6, "position": "LM/RM"}, {
-    "key": "ความอึด",
-    "value": 5,
-    "position": "LM/RM"
-}, {"key": "ส่งไกล", "value": 5, "position": "LM/RM"}, {
-    "key": "ประกบตัว",
-    "value": 17,
-    "position": "CB"
-}, {"key": "เข้าสกัด", "value": 14, "position": "CB"}, {
-    "key": "เข้าปะทะ",
-    "value": 13,
-    "position": "CB"
-}, {"key": "สไลด์", "value": 10, "position": "CB"}, {
-    "key": "โหม่งบอล",
-    "value": 10,
-    "position": "CB"
-}, {"key": "แข็งแกร่ง", "value": 10, "position": "CB"}, {
-    "key": "ดุดัน",
-    "value": 7,
-    "position": "CB"
-}, {"key": "ปฏิกิริยา", "value": 5, "position": "CB"}, {
-    "key": "ส่งสั้น",
-    "value": 5,
-    "position": "CB"
-}, {"key": "ควบคุมบอล", "value": 4, "position": "CB"}, {
-    "key": "กระโดด",
-    "value": 3,
-    "position": "CB"
-}, {"key": "ความเร็ว", "value": 2, "position": "CB"}, {
-    "key": "สไลด์",
-    "value": 14,
-    "position": "LB/RB"
-}, {"key": "เข้าสกัด", "value": 12, "position": "LB/RB"}, {
-    "key": "เข้าปะทะ",
-    "value": 11,
-    "position": "LB/RB"
-}, {"key": "เปิดบอล", "value": 9, "position": "LB/RB"}, {
-    "key": "ความอึด",
-    "value": 8,
-    "position": "LB/RB"
-}, {"key": "ปฏิกิริยา", "value": 8, "position": "LB/RB"}, {
-    "key": "ประกบตัว",
-    "value": 8,
-    "position": "LB/RB"
-}, {"key": "ส่งสั้น", "value": 7, "position": "LB/RB"}, {
-    "key": "ควบคุมบอล",
-    "value": 7,
-    "position": "LB/RB"
-}, {"key": "ความเร็ว", "value": 7, "position": "LB/RB"}, {
-    "key": "สปีดต้น",
-    "value": 5,
-    "position": "LB/RB"
-}, {"key": "โหม่งบอล", "value": 4, "position": "LB/RB"}, {
-    "key": "เข้าสกัด",
-    "value": 12,
-    "position": "LWB/RWB"
-}, {"key": "เปิดบอล", "value": 12, "position": "LWB/RWB"}, {
-    "key": "สไลด์",
-    "value": 11,
-    "position": "LWB/RWB"
-}, {"key": "ส่งสั้น", "value": 10, "position": "LWB/RWB"}, {
-    "key": "ความอึด",
-    "value": 10,
-    "position": "LWB/RWB"
-}, {"key": "เข้าปะทะ", "value": 8, "position": "LWB/RWB"}, {
-    "key": "ควบคุมบอล",
-    "value": 8,
-    "position": "LWB/RWB"
-}, {"key": "ปฏิกิริยา", "value": 8, "position": "LWB/RWB"}, {
-    "key": "ประกบตัว",
-    "value": 7,
-    "position": "LWB/RWB"
-}, {"key": "ความเร็ว", "value": 6, "position": "LWB/RWB"}, {
-    "key": "เลี้ยงบอล",
-    "value": 4,
-    "position": "LWB/RWB"
-}, {"key": "สปีดต้น", "value": 4, "position": "LWB/RWB"}, {
-    "key": "พุ่งรับ",
-    "value": 21,
-    "position": "GK"
-}, {"key": "รับบอล", "value": 21, "position": "GK"}, {
-    "key": "ยืนตำแหน่ง",
-    "value": 21,
-    "position": "GK"
-}, {"key": "GK ปฏิกิริยา", "value": 21, "position": "GK"}, {
-    "key": "ปฏิกิริยา",
-    "value": 11,
-    "position": "GK"
-}, {"key": "ส่งบอล", "value": 5, "position": "GK"}];
+const dataset = [
+    {
+        "key": "จบสกอร์",
+        "value": 18,
+        "position": "ST"
+    },
+    {
+        "key": "ยืนตำแหน่ง",
+        "value": 13,
+        "position": "ST"
+    },
+    {
+        "key": "ควบคุมบอล",
+        "value": 10,
+        "position": "ST"
+    },
+    {
+        "key": "พลังการยิง",
+        "value": 10,
+        "position": "ST"
+    },
+    {
+        "key": "โหม่งบอล",
+        "value": 10,
+        "position": "ST"
+    },
+    {
+        "key": "ปฏิกิริยา",
+        "value": 8,
+        "position": "ST"
+    },
+    {
+        "key": "เลี้ยงบอล",
+        "value": 7,
+        "position": "ST"
+    },
+    {
+        "key": "แข็งแกร่ง",
+        "value": 5,
+        "position": "ST"
+    },
+    {
+        "key": "ความเร็ว",
+        "value": 5,
+        "position": "ST"
+    },
+    {
+        "key": "ส่งสั้น",
+        "value": 5,
+        "position": "ST"
+    },
+    {
+        "key": "สปีดต้น",
+        "value": 4,
+        "position": "ST"
+    },
+    {
+        "key": "ยิงไกล",
+        "value": 3,
+        "position": "ST"
+    },
+    {
+        "key": "วอลเลย์",
+        "value": 2,
+        "position": "ST"
+    },
+    {
+        "key": "ควบคุมบอล",
+        "value": 15,
+        "position": "CF"
+    },
+    {
+        "key": "เลี้ยงบอล",
+        "value": 14,
+        "position": "CF"
+    },
+    {
+        "key": "ยืนตำแหน่ง",
+        "value": 13,
+        "position": "CF"
+    },
+    {
+        "key": "จบสกอร์",
+        "value": 11,
+        "position": "CF"
+    },
+    {
+        "key": "ปฏิกิริยา",
+        "value": 9,
+        "position": "CF"
+    },
+    {
+        "key": "ส่งสั้น",
+        "value": 9,
+        "position": "CF"
+    },
+    {
+        "key": "อ่านเกมส์",
+        "value": 8,
+        "position": "CF"
+    },
+    {
+        "key": "พลังการยิง",
+        "value": 5,
+        "position": "CF"
+    },
+    {
+        "key": "ความเร็ว",
+        "value": 5,
+        "position": "CF"
+    },
+    {
+        "key": "สปีดต้น",
+        "value": 5,
+        "position": "CF"
+    },
+    {
+        "key": "ยิงไกล",
+        "value": 4,
+        "position": "CF"
+    },
+    {
+        "key": "โหม่งบอล",
+        "value": 2,
+        "position": "CF"
+    },
+    {
+        "key": "เลี้ยงบอล",
+        "value": 16,
+        "position": "LW/RW"
+    },
+    {
+        "key": "ควบคุมบอล",
+        "value": 14,
+        "position": "LW/RW"
+    },
+    {
+        "key": "จบสกอร์",
+        "value": 10,
+        "position": "LW/RW"
+    },
+    {
+        "key": "ยืนตำแหน่ง",
+        "value": 9,
+        "position": "LW/RW"
+    },
+    {
+        "key": "ส่งสั้น",
+        "value": 9,
+        "position": "LW/RW"
+    },
+    {
+        "key": "เปิดบอล",
+        "value": 9,
+        "position": "LW/RW"
+    },
+    {
+        "key": "ปฏิกิริยา",
+        "value": 7,
+        "position": "LW/RW"
+    },
+    {
+        "key": "สปีดต้น",
+        "value": 7,
+        "position": "LW/RW"
+    },
+    {
+        "key": "อ่านเกมส์",
+        "value": 6,
+        "position": "LW/RW"
+    },
+    {
+        "key": "ความเร็ว",
+        "value": 6,
+        "position": "LW/RW"
+    },
+    {
+        "key": "ยิงไกล",
+        "value": 4,
+        "position": "LW/RW"
+    },
+    {
+        "key": "คล่องตัว",
+        "value": 3,
+        "position": "LW/RW"
+    },
+    {
+        "key": "ส่งสั้น",
+        "value": 14,
+        "position": "CDM"
+    },
+    {
+        "key": "เข้าสกัด",
+        "value": 14,
+        "position": "CDM"
+    },
+    {
+        "key": "เข้าปะทะ",
+        "value": 12,
+        "position": "CDM"
+    },
+    {
+        "key": "ควบคุมบอล",
+        "value": 10,
+        "position": "CDM"
+    },
+    {
+        "key": "ส่งไกล",
+        "value": 10,
+        "position": "CDM"
+    },
+    {
+        "key": "ประกบตัว",
+        "value": 9,
+        "position": "CDM"
+    },
+    {
+        "key": "ปฏิกิริยา",
+        "value": 7,
+        "position": "CDM"
+    },
+    {
+        "key": "ความอึด",
+        "value": 6,
+        "position": "CDM"
+    },
+    {
+        "key": "สไลด์",
+        "value": 5,
+        "position": "CDM"
+    },
+    {
+        "key": "ดุดัน",
+        "value": 5,
+        "position": "CDM"
+    },
+    {
+        "key": "อ่านเกม",
+        "value": 4,
+        "position": "CDM"
+    },
+    {
+        "key": "แข็งแกร่ง",
+        "value": 4,
+        "position": "CDM"
+    },
+    {
+        "key": "ส่งสั้น",
+        "value": 17,
+        "position": "CM"
+    },
+    {
+        "key": "ควบคุมบอล",
+        "value": 14,
+        "position": "CM"
+    },
+    {
+        "key": "อ่านเกมส์",
+        "value": 13,
+        "position": "CM"
+    },
+    {
+        "key": "ส่งไกล",
+        "value": 13,
+        "position": "CM"
+    },
+    {
+        "key": "ปฏิกิริยา",
+        "value": 8,
+        "position": "CM"
+    },
+    {
+        "key": "เลี้ยงบอล",
+        "value": 7,
+        "position": "CM"
+    },
+    {
+        "key": "ยืนตำแหน่ง",
+        "value": 6,
+        "position": "CM"
+    },
+    {
+        "key": "ความอึด",
+        "value": 6,
+        "position": "CM"
+    },
+    {
+        "key": "เข้าปะทะ",
+        "value": 5,
+        "position": "CM"
+    },
+    {
+        "key": "เข้าสกัด",
+        "value": 5,
+        "position": "CM"
+    },
+    {
+        "key": "ยิงไกล",
+        "value": 4,
+        "position": "CM"
+    },
+    {
+        "key": "จบสกอร์",
+        "value": 2,
+        "position": "CM"
+    },
+    {
+        "key": "ส่งสั้น",
+        "value": 16,
+        "position": "CAM"
+    },
+    {
+        "key": "ควบคุมบอล",
+        "value": 15,
+        "position": "CAM"
+    },
+    {
+        "key": "อ่านเกมส์",
+        "value": 14,
+        "position": "CAM"
+    },
+    {
+        "key": "เลี้ยงบอล",
+        "value": 13,
+        "position": "CAM"
+    },
+    {
+        "key": "ยืนตำแหน่ง",
+        "value": 9,
+        "position": "CAM"
+    },
+    {
+        "key": "ปฏิกิริยา",
+        "value": 7,
+        "position": "CAM"
+    },
+    {
+        "key": "จบสกอร์",
+        "value": 7,
+        "position": "CAM"
+    },
+    {
+        "key": "ยิงไกล",
+        "value": 5,
+        "position": "CAM"
+    },
+    {
+        "key": "สปีดต้น",
+        "value": 4,
+        "position": "CAM"
+    },
+    {
+        "key": "ส่งไกล",
+        "value": 4,
+        "position": "CAM"
+    },
+    {
+        "key": "ความเร็ว",
+        "value": 3,
+        "position": "CAM"
+    },
+    {
+        "key": "คล่องตัว",
+        "value": 3,
+        "position": "CAM"
+    },
+    {
+        "key": "เลี้ยงบอล",
+        "value": 15,
+        "position": "LM/RM"
+    },
+    {
+        "key": "ควบคุมบอล",
+        "value": 13,
+        "position": "LM/RM"
+    },
+    {
+        "key": "ส่งสั้น",
+        "value": 11,
+        "position": "LM/RM"
+    },
+    {
+        "key": "เปิดบอล",
+        "value": 10,
+        "position": "LM/RM"
+    },
+    {
+        "key": "ยืนตำแหน่ง",
+        "value": 8,
+        "position": "LM/RM"
+    },
+    {
+        "key": "ปฏิกิริยา",
+        "value": 7,
+        "position": "LM/RM"
+    },
+    {
+        "key": "สปีดต้น",
+        "value": 7,
+        "position": "LM/RM"
+    },
+    {
+        "key": "อ่านเกม",
+        "value": 7,
+        "position": "LM/RM"
+    },
+    {
+        "key": "จบสกอร์",
+        "value": 6,
+        "position": "LM/RM"
+    },
+    {
+        "key": "ความเร็ว",
+        "value": 6,
+        "position": "LM/RM"
+    },
+    {
+        "key": "ความอึด",
+        "value": 5,
+        "position": "LM/RM"
+    },
+    {
+        "key": "ส่งไกล",
+        "value": 5,
+        "position": "LM/RM"
+    },
+    {
+        "key": "ประกบตัว",
+        "value": 17,
+        "position": "CB"
+    },
+    {
+        "key": "เข้าสกัด",
+        "value": 14,
+        "position": "CB"
+    },
+    {
+        "key": "เข้าปะทะ",
+        "value": 13,
+        "position": "CB"
+    },
+    {
+        "key": "สไลด์",
+        "value": 10,
+        "position": "CB"
+    },
+    {
+        "key": "โหม่งบอล",
+        "value": 10,
+        "position": "CB"
+    },
+    {
+        "key": "แข็งแกร่ง",
+        "value": 10,
+        "position": "CB"
+    },
+    {
+        "key": "ดุดัน",
+        "value": 7,
+        "position": "CB"
+    },
+    {
+        "key": "ปฏิกิริยา",
+        "value": 5,
+        "position": "CB"
+    },
+    {
+        "key": "ส่งสั้น",
+        "value": 5,
+        "position": "CB"
+    },
+    {
+        "key": "ควบคุมบอล",
+        "value": 4,
+        "position": "CB"
+    },
+    {
+        "key": "กระโดด",
+        "value": 3,
+        "position": "CB"
+    },
+    {
+        "key": "ความเร็ว",
+        "value": 2,
+        "position": "CB"
+    },
+    {
+        "key": "สไลด์",
+        "value": 14,
+        "position": "LB/RB"
+    },
+    {
+        "key": "เข้าสกัด",
+        "value": 12,
+        "position": "LB/RB"
+    },
+    {
+        "key": "เข้าปะทะ",
+        "value": 11,
+        "position": "LB/RB"
+    },
+    {
+        "key": "เปิดบอล",
+        "value": 9,
+        "position": "LB/RB"
+    },
+    {
+        "key": "ความอึด",
+        "value": 8,
+        "position": "LB/RB"
+    },
+    {
+        "key": "ปฏิกิริยา",
+        "value": 8,
+        "position": "LB/RB"
+    },
+    {
+        "key": "ประกบตัว",
+        "value": 8,
+        "position": "LB/RB"
+    },
+    {
+        "key": "ส่งสั้น",
+        "value": 7,
+        "position": "LB/RB"
+    },
+    {
+        "key": "ควบคุมบอล",
+        "value": 7,
+        "position": "LB/RB"
+    },
+    {
+        "key": "ความเร็ว",
+        "value": 7,
+        "position": "LB/RB"
+    },
+    {
+        "key": "สปีดต้น",
+        "value": 5,
+        "position": "LB/RB"
+    },
+    {
+        "key": "โหม่งบอล",
+        "value": 4,
+        "position": "LB/RB"
+    },
+    {
+        "key": "เข้าสกัด",
+        "value": 12,
+        "position": "LWB/RWB"
+    },
+    {
+        "key": "เปิดบอล",
+        "value": 12,
+        "position": "LWB/RWB"
+    },
+    {
+        "key": "สไลด์",
+        "value": 11,
+        "position": "LWB/RWB"
+    },
+    {
+        "key": "ส่งสั้น",
+        "value": 10,
+        "position": "LWB/RWB"
+    },
+    {
+        "key": "ความอึด",
+        "value": 10,
+        "position": "LWB/RWB"
+    },
+    {
+        "key": "เข้าปะทะ",
+        "value": 8,
+        "position": "LWB/RWB"
+    },
+    {
+        "key": "ควบคุมบอล",
+        "value": 8,
+        "position": "LWB/RWB"
+    },
+    {
+        "key": "ปฏิกิริยา",
+        "value": 8,
+        "position": "LWB/RWB"
+    },
+    {
+        "key": "ประกบตัว",
+        "value": 7,
+        "position": "LWB/RWB"
+    },
+    {
+        "key": "ความเร็ว",
+        "value": 6,
+        "position": "LWB/RWB"
+    },
+    {
+        "key": "เลี้ยงบอล",
+        "value": 4,
+        "position": "LWB/RWB"
+    },
+    {
+        "key": "สปีดต้น",
+        "value": 4,
+        "position": "LWB/RWB"
+    },
+    {
+        "key": "พุ่งรับ",
+        "value": 21,
+        "position": "GK"
+    },
+    {
+        "key": "รับบอล",
+        "value": 21,
+        "position": "GK"
+    },
+    {
+        "key": "ยืนตำแหน่ง",
+        "value": 21,
+        "position": "GK"
+    },
+    {
+        "key": "GK ปฏิกิริยา",
+        "value": 21,
+        "position": "GK"
+    },
+    {
+        "key": "ปฏิกิริยา",
+        "value": 11,
+        "position": "GK"
+    },
+    {
+        "key": "ส่งบอล",
+        "value": 5,
+        "position": "GK"
+    }
+];
 
 function PlayerStatusCalculator() {
     const [selectedPosition, setSelectedPosition] = useState('');
@@ -442,7 +830,7 @@ function PlayerStatusCalculator() {
                 <img src='populu.png' alt="Logo" style={{width: '100px', cursor: 'pointer'}}
                      onClick={() => window.open('https://www.youtube.com/@poppulu', '_blank')}
 
-                     />
+                />
             </div>
 
         </Container>
