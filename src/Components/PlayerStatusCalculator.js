@@ -826,12 +826,7 @@ function PlayerStatusCalculator() {
                     </div>
                 </Col>
             </Row>
-            <div style={{position: 'fixed', bottom: '20px', right: '20px', zIndex: 1000}}>
-                <img src='populu.png' alt="Logo" style={{width: '100px', cursor: 'pointer'}}
-                     onClick={() => window.open('https://www.youtube.com/@poppulu', '_blank')}
-
-                />
-            </div>
+             
 
         </Container>
     );
