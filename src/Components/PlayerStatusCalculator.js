@@ -692,7 +692,242 @@ function PlayerStatusCalculator() {
 
 
     // กรองข้อมูลสถานะของผู้เล่นที่ตรงกับตำแหน่งที่เลือก
-    const filteredPlayers = dataset.filter(player => player.position === selectedPosition);
+    let filteredPlayers = dataset.filter(player => player.position === selectedPosition);
+
+    // ส่วนการเรียงลำดับ
+    if (selectedPosition === 'ST') {
+        const stOrder = [
+            "แข็งแกร่ง",
+            "สปีดต้น",
+            "ความเร็ว",
+            "เลี้ยงบอล",
+            "ควบคุมบอล",
+            "ส่งสั้น",
+            "จบสกอร์",
+            "พลังการยิง",
+            "โหม่งบอล",
+            "ยิงไกล",
+            "วอลเลย์",
+            "ยืนตำแหน่ง",
+            "ปฏิกิริยา"
+        ];
+
+        const orderMap = new Map(stOrder.map((key, index) => [key, index]));
+
+        filteredPlayers.sort((a, b) => {
+            const indexA = orderMap.has(a.key) ? orderMap.get(a.key) : Infinity;
+            const indexB = orderMap.has(b.key) ? orderMap.get(b.key) : Infinity;
+            return indexA - indexB;
+        });
+    } else if (selectedPosition === 'LM/RM') {
+        const lmrmOrder = [
+            "ความอึด",
+            "สปีดต้น",
+            "ความเร็ว",
+            "เลี้ยงบอล",
+            "ควบคุมบอล",
+            "เปิดบอล",
+            "ส่งสั้น",
+            "จบสกอร์",
+            "ส่งไกล",
+            "ยืนตำแหน่ง",
+            "อ่านเกม",
+            "ปฏิกิริยา"
+        ];
+
+        const orderMap = new Map(lmrmOrder.map((key, index) => [key, index]));
+
+        filteredPlayers.sort((a, b) => {
+            const indexA = orderMap.has(a.key) ? orderMap.get(a.key) : Infinity;
+            const indexB = orderMap.has(b.key) ? orderMap.get(b.key) : Infinity;
+            return indexA - indexB;
+        });
+    } else if (selectedPosition === 'CF') {
+        const cfOrder = [
+            "สปีดต้น",
+            "ความเร็ว",
+            "เลี้ยงบอล",
+            "ควบคุมบอล",
+            "ส่งสั้น",
+            "จบสกอร์",
+            "พลังการยิง",
+            "โหม่งบอล",
+            "ยิงไกล",
+            "ยืนตำแหน่ง",
+            "อ่านเกมส์",
+            "ปฏิกิริยา"
+        ];
+
+        const orderMap = new Map(cfOrder.map((key, index) => [key, index]));
+
+        filteredPlayers.sort((a, b) => {
+            const indexA = orderMap.has(a.key) ? orderMap.get(a.key) : Infinity;
+            const indexB = orderMap.has(b.key) ? orderMap.get(b.key) : Infinity;
+            return indexA - indexB;
+        });
+    } else if (selectedPosition === 'LW/RW') {
+        const lwrwOrder = [
+            "สปีดต้น",
+            "ความเร็ว",
+            "คล่องตัว",
+            "เลี้ยงบอล",
+            "ควบคุมบอล",
+            "เปิดบอล",
+            "ส่งสั้น",
+            "จบสกอร์",
+            "ยิงไกล",
+            "ยืนตำแหน่ง",
+            "อ่านเกมส์",
+            "ปฏิกิริยา"
+        ];
+
+        const orderMap = new Map(lwrwOrder.map((key, index) => [key, index]));
+
+        filteredPlayers.sort((a, b) => {
+            const indexA = orderMap.has(a.key) ? orderMap.get(a.key) : Infinity;
+            const indexB = orderMap.has(b.key) ? orderMap.get(b.key) : Infinity;
+            return indexA - indexB;
+        });
+    } else if (selectedPosition === 'CAM') {
+        const camOrder = [
+            "สปีดต้น",
+            "ความเร็ว",
+            "คล่องตัว",
+            "เลี้ยงบอล",
+            "ควบคุมบอล",
+            "ส่งสั้น",
+            "จบสกอร์",
+            "ส่งไกล",
+            "ยิงไกล",
+            "ยืนตำแหน่ง",
+            "อ่านเกมส์",
+            "ปฏิกิริยา"
+        ];
+
+        const orderMap = new Map(camOrder.map((key, index) => [key, index]));
+
+        filteredPlayers.sort((a, b) => {
+            const indexA = orderMap.has(a.key) ? orderMap.get(a.key) : Infinity;
+            const indexB = orderMap.has(b.key) ? orderMap.get(b.key) : Infinity;
+            return indexA - indexB;
+        });
+    } else if (selectedPosition === 'CM') {
+        const cmOrder = [
+            "ความอึด",
+            "เลี้ยงบอล",
+            "ควบคุมบอล",
+            "เข้าปะทะ",
+            "ส่งสั้น",
+            "จบสกอร์",
+            "ส่งไกล",
+            "ยิงไกล",
+            "เข้าสกัด",
+            "ยืนตำแหน่ง",
+            "อ่านเกมส์",
+            "ปฏิกิริยา"
+        ];
+
+        const orderMap = new Map(cmOrder.map((key, index) => [key, index]));
+
+        filteredPlayers.sort((a, b) => {
+            const indexA = orderMap.has(a.key) ? orderMap.get(a.key) : Infinity;
+            const indexB = orderMap.has(b.key) ? orderMap.get(b.key) : Infinity;
+            return indexA - indexB;
+        });
+    } else if (selectedPosition === 'CDM') {
+        const cdmOrder = [
+            "แข็งแกร่ง",
+            "ความอึด",
+            "สไลด์",
+            "ควบคุมบอล",
+            "ประกบตัว",
+            "เข้าปะทะ",
+            "ส่งสั้น",
+            "ส่งไกล",
+            "เข้าสกัด",
+            "อ่านเกม",
+            "ปฏิกิริยา",
+            "ดุดัน"
+        ];
+
+        const orderMap = new Map(cdmOrder.map((key, index) => [key, index]));
+
+        filteredPlayers.sort((a, b) => {
+            const indexA = orderMap.has(a.key) ? orderMap.get(a.key) : Infinity;
+            const indexB = orderMap.has(b.key) ? orderMap.get(b.key) : Infinity;
+            return indexA - indexB;
+        });
+    } else if (selectedPosition === 'CB') {
+        const cbOrder = [
+            "แข็งแกร่ง",
+            "ความเร็ว",
+            "กระโดด",
+            "สไลด์",
+            "ควบคุมบอล",
+            "ประกบตัว",
+            "เข้าปะทะ",
+            "ส่งสั้น",
+            "โหม่งบอล",
+            "เข้าสกัด",
+            "ปฏิกิริยา",
+            "ดุดัน"
+        ];
+
+        const orderMap = new Map(cbOrder.map((key, index) => [key, index]));
+
+        filteredPlayers.sort((a, b) => {
+            const indexA = orderMap.has(a.key) ? orderMap.get(a.key) : Infinity;
+            const indexB = orderMap.has(b.key) ? orderMap.get(b.key) : Infinity;
+            return indexA - indexB;
+        });
+    } else if (selectedPosition === 'LB/RB') {
+        const lbrbOrder = [
+            "ความอึด",
+            "สปีดต้น",
+            "ความเร็ว",
+            "สไลด์",
+            "ควบคุมบอล",
+            "ประกบตัว",
+            "เข้าปะทะ",
+            "เปิดบอล",
+            "ส่งสั้น",
+            "โหม่งบอล",
+            "เข้าสกัด",
+            "ปฏิกิริยา"
+        ];
+
+        const orderMap = new Map(lbrbOrder.map((key, index) => [key, index]));
+
+        filteredPlayers.sort((a, b) => {
+            const indexA = orderMap.has(a.key) ? orderMap.get(a.key) : Infinity;
+            const indexB = orderMap.has(b.key) ? orderMap.get(b.key) : Infinity;
+            return indexA - indexB;
+        });
+    } else if (selectedPosition === 'LWB/RWB') { // เพิ่มเงื่อนไขสำหรับ LWB/RWB
+        const lwbrwbOrder = [
+            "ความอึด",
+            "สปีดต้น",
+            "ความเร็ว",
+            "สไลด์",
+            "เลี้ยงบอล",
+            "ควบคุมบอล",
+            "ประกบตัว",
+            "เข้าปะทะ",
+            "เปิดบอล",
+            "ส่งสั้น",
+            "เข้าสกัด",
+            "ปฏิกิริยา"
+        ];
+
+        const orderMap = new Map(lwbrwbOrder.map((key, index) => [key, index]));
+
+        filteredPlayers.sort((a, b) => {
+            const indexA = orderMap.has(a.key) ? orderMap.get(a.key) : Infinity;
+            const indexB = orderMap.has(b.key) ? orderMap.get(b.key) : Infinity;
+            return indexA - indexB;
+        });
+    }
+    // คุณสามารถเพิ่มเงื่อนไขการเรียงลำดับสำหรับตำแหน่งอื่นๆ ได้ที่นี่
 
     return (
         <Container fluid style={{
@@ -826,7 +1061,7 @@ function PlayerStatusCalculator() {
                     </div>
                 </Col>
             </Row>
-             
+
 
         </Container>
     );
