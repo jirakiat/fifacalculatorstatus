@@ -1052,7 +1052,7 @@ function PlayerStatusCalculator() {
                         {selectedPosition && (
                             <> {/* ใช้ Fragment เพื่อครอบปุ่มและ Form */}
                                 <Button onClick={toggleSortOrder} className="mb-3 custom-sort-button">
-                                    {sortOrder === 'default' ? 'เรียงตาม Value' : 'เรียงตามความสำคัญ'}
+                                    {sortOrder === 'default' ? 'เรียงตางตามความสำคัญ' : 'เรียงตามพลังในเกมส์'}
                                 </Button>
                                 <Form>
                                     <InputForm statusPlayers={filteredPlayers} onInputChange={handleInputChange}
