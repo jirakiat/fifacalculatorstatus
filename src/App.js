@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
     User, Activity, Shield, Target, Calculator, RefreshCw, ArrowUpDown, Zap, CheckCircle2, Flame, Crosshair, TrendingUp, Wind, Dna,
-    Goal, MapPin, CircleDot, ArrowBigUp, Lightbulb, Move, ArrowRightLeft, Rocket, Eye, CornerUpRight, Scissors, Footprints, Lock, Battery, ChevronsDown, Hand, Send, Sparkles, Save, Trash2, FolderOpen, PenLine, Upload, AlertCircle, FilePlus, ChevronRight
+    Goal, MapPin, CircleDot, ArrowBigUp, Lightbulb, Move, ArrowRightLeft, Rocket, Eye, CornerUpRight, Scissors, Footprints, Lock, Battery, ChevronsDown, Hand, Send, Sparkles, Save, Trash2, FolderOpen, PenLine, AlertCircle, FilePlus, ChevronRight
 } from 'lucide-react';
 
 // --- Configuration Data ---
@@ -323,17 +323,18 @@ export default function App() {
         });
     };
 
-    const calculateStatus = () => {
-        let total = 0;
-        dataset.filter(player => player.position === selectedPosition).forEach(player => {
-            const mainValue = inputs[player.key] ? parseFloat(inputs[player.key]) : 0;
-            const tcBonus = tcState[player.key] ? 2 : 0; 
-            total += (mainValue + tcBonus) * player.value;
-        });
-        setCalculatedValue(total / 100);
-    };
-
-    useEffect(() => { calculateStatus(); }, [inputs, tcState, selectedPosition]);
+    useEffect(() => {
+        const calculateStatus = () => {
+            let total = 0;
+            dataset.filter(player => player.position === selectedPosition).forEach(player => {
+                const mainValue = inputs[player.key] ? parseFloat(inputs[player.key]) : 0;
+                const tcBonus = tcState[player.key] ? 2 : 0; 
+                total += (mainValue + tcBonus) * player.value;
+            });
+            setCalculatedValue(total / 100);
+        };
+        calculateStatus();
+    }, [inputs, tcState, selectedPosition]);
 
     const toggleSortOrder = () => setSortOrder(prev => prev === 'default' ? 'value' : 'default');
 
