@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
     User, Activity, Shield, Target, Calculator, RefreshCw, ArrowUpDown, Zap, CheckCircle2, Flame, Crosshair, TrendingUp, Wind, Dna,
-    Goal, MapPin, CircleDot, ArrowBigUp, Lightbulb, Move, ArrowRightLeft, Rocket, Eye, CornerUpRight, Scissors, Footprints, Lock, Battery, ChevronsDown, Hand, Send, Sparkles, Save, Trash2, FolderOpen, PenLine, AlertCircle, FilePlus, ChevronRight, Eraser, GitCompare, X, Download
+    Goal, MapPin, CircleDot, ArrowBigUp, Lightbulb, Move, ArrowRightLeft, Rocket, Eye, CornerUpRight, Scissors, Footprints, Lock, Battery, ChevronsDown, Hand, Send, Sparkles, Save, Trash2, FolderOpen, PenLine, AlertCircle, FilePlus, ChevronRight, Eraser, GitCompare, X
 } from 'lucide-react';
 
 // --- Configuration Data ---
@@ -205,11 +205,8 @@ const InputForm = ({ players, inputs, tcState, onInputChange, onTCToggle, tcCoun
     );
 };
 
-const ResultDisplay = ({ calculatedValue, position, topFactors, strategies, activeStrategyId, onSelectStrategy, onApplyStrategy, playerName }) => {
-    const activeStrategy = strategies.find(s => s.id === activeStrategyId) || strategies[0];
-    const bonusRating = calculateBonus(activeStrategy.candidates);
-    
-    // Feature 6: Dynamic Card Themes
+// New Reusable PlayerCard Component
+const PlayerCard = ({ rating, position, name, small = false }) => {
     const getCardColor = (r) => {
         if (r >= 140) return 'from-fuchsia-600 via-purple-600 to-indigo-900 border-fuchsia-500/50 shadow-[0_0_30px_rgba(192,38,211,0.3)]'; // Icon
         if (r >= 130) return 'from-yellow-300 via-amber-500 to-amber-700 border-amber-400/50 shadow-[0_0_20px_rgba(245,158,11,0.3)]'; // Gold
@@ -217,6 +214,47 @@ const ResultDisplay = ({ calculatedValue, position, topFactors, strategies, acti
         return 'from-orange-800 to-red-900 border-orange-600/50'; // Basic
     };
 
+    const cardColor = getCardColor(rating);
+    const sizeClasses = small ? "w-32 h-44 rounded-t-xl rounded-b-[2rem]" : "w-48 h-64 rounded-t-2xl rounded-b-[3rem]";
+    const textTitle = small ? "text-3xl" : "text-5xl";
+    const textPos = small ? "text-xs" : "text-sm";
+    const iconSize = small ? 32 : 48;
+    const nameSize = small ? "text-xs" : "text-lg";
+
+    return (
+        <div className={`relative ${sizeClasses} bg-gradient-to-br ${cardColor} border-2 shadow-2xl flex flex-col items-center pt-4 text-white overflow-hidden transform transition-all duration-500`}>
+            <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] mix-blend-overlay"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+            <div className="absolute -inset-full top-0 block h-full w-1/2 -skew-x-12 bg-gradient-to-r from-transparent to-white opacity-10 group-hover:animate-shine" />
+            
+            {/* Sparkle effect for high rating */}
+            {!small && rating >= 140 && (
+                <div className="absolute inset-0 z-0">
+                    <Sparkles className="absolute top-2 right-2 text-white/50 animate-pulse" size={16} />
+                    <Sparkles className="absolute bottom-10 left-2 text-white/30 animate-pulse delay-75" size={12} />
+                </div>
+            )}
+
+            <div className={`absolute ${small ? 'top-2 left-2' : 'top-5 left-5'} flex flex-col items-center z-10`}>
+                <span className={`${textTitle} font-black drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)] leading-none tracking-tighter text-white`}>{Math.floor(rating)}</span>
+                <span className={`${textPos} font-bold uppercase tracking-widest mt-1 opacity-90 font-kanit text-shadow`}>{position || 'POS'}</span>
+            </div>
+            
+            <div className={`mt-2 ${small ? 'w-16 h-16' : 'w-24 h-24'} bg-black/40 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/10 z-10 shadow-inner`}>
+                <User size={iconSize} className="text-white/80" />
+            </div>
+            
+            <div className="mt-auto mb-4 w-full text-center border-t border-white/10 pt-1 z-10">
+                <span className={`${nameSize} font-black uppercase tracking-[0.2em] drop-shadow-md font-kanit text-white/80 truncate px-2 block`}>{name || 'PLAYER'}</span>
+            </div>
+        </div>
+    );
+};
+
+const ResultDisplay = ({ calculatedValue, position, topFactors, strategies, activeStrategyId, onSelectStrategy, onApplyStrategy, playerName }) => {
+    const activeStrategy = strategies.find(s => s.id === activeStrategyId) || strategies[0];
+    const bonusRating = calculateBonus(activeStrategy.candidates);
+    
     // Feature 3: Detailed Decimal Rating
     const decimalPart = calculatedValue % 1;
     const progressPercent = decimalPart * 100;
@@ -224,25 +262,8 @@ const ResultDisplay = ({ calculatedValue, position, topFactors, strategies, acti
     return (
         <div className="space-y-6">
             <div className="flex flex-col items-center justify-center p-6 bg-slate-800/30 rounded-3xl border border-white/5 backdrop-blur-md relative overflow-hidden group">
-                <div className={`relative w-48 h-64 bg-gradient-to-br ${getCardColor(calculatedValue)} rounded-t-2xl rounded-b-[3rem] border-2 shadow-2xl flex flex-col items-center pt-6 text-white overflow-hidden transform transition-all duration-500 group-hover:scale-105`}>
-                    <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] mix-blend-overlay"></div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
-                    <div className="absolute -inset-full top-0 block h-full w-1/2 -skew-x-12 bg-gradient-to-r from-transparent to-white opacity-10 group-hover:animate-shine" />
-                    
-                    {/* Sparkle effect for high rating */}
-                    {calculatedValue >= 140 && (
-                        <div className="absolute inset-0 z-0">
-                            <Sparkles className="absolute top-2 right-2 text-white/50 animate-pulse" size={16} />
-                            <Sparkles className="absolute bottom-10 left-2 text-white/30 animate-pulse delay-75" size={12} />
-                        </div>
-                    )}
-
-                    <div className="absolute top-5 left-5 flex flex-col items-center z-10">
-                        <span className={`text-5xl font-black drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)] leading-none tracking-tighter ${calculatedValue >= 130 ? 'text-white' : 'text-white'}`}>{Math.floor(calculatedValue)}</span>
-                        <span className="text-sm font-bold uppercase tracking-widest mt-1 opacity-90 font-kanit text-shadow">{position || 'POS'}</span>
-                    </div>
-                    <div className="mt-4 w-24 h-24 bg-black/40 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/10 z-10 shadow-inner"><User size={48} className="text-white/80" /></div>
-                    <div className="mt-auto mb-6 w-full text-center border-t border-white/10 pt-2 z-10"><span className="text-lg font-black uppercase tracking-[0.2em] drop-shadow-md font-kanit text-white/80 truncate px-2">{playerName || 'PLAYER'}</span></div>
+                <div className="group-hover:scale-105 transition-transform duration-500">
+                    <PlayerCard rating={calculatedValue} position={position} name={playerName} />
                 </div>
                 
                 <div className="mt-6 text-center z-10 w-full px-6">
@@ -343,45 +364,55 @@ const CompareModalContent = ({ current, target, dataset }) => {
 
     return (
         <div className="font-kanit">
-             <div className="flex justify-between items-center bg-slate-800/50 p-4 rounded-xl mb-4 border border-white/5">
-                <div className="text-center w-1/3">
-                    <div className="text-xs text-slate-400 mb-1">ปัจจุบัน</div>
-                    <div className="text-indigo-400 font-bold text-lg">{current.name || "Draft"}</div>
-                    <div className="text-2xl font-black text-white">{current.rating.toFixed(2)}</div>
+             <div className="flex justify-around items-center mb-6">
+                <div className="flex flex-col items-center gap-2">
+                    <span className="text-xs text-slate-400 bg-slate-800/50 px-2 py-1 rounded-full border border-white/5">ปัจจุบัน</span>
+                    <PlayerCard rating={current.rating} position={current.position} name={current.name} small />
                 </div>
-                <div className="text-center w-1/3 flex flex-col items-center">
-                    <div className="text-xs text-slate-500 mb-1">ส่วนต่าง</div>
-                     <div className={`text-xl font-bold ${diff > 0 ? 'text-green-400' : diff < 0 ? 'text-red-400' : 'text-slate-400'}`}>
+                <div className="flex flex-col items-center gap-2">
+                    <span className="text-slate-500 font-bold text-3xl font-mono italic opacity-50">VS</span>
+                    <div className={`text-sm font-bold px-3 py-1 rounded-full ${diff > 0 ? 'bg-rose-500/10 text-rose-400' : diff < 0 ? 'bg-sky-500/10 text-sky-400' : 'bg-slate-700 text-slate-300'}`}>
                         {diff > 0 ? '+' : ''}{diff.toFixed(2)}
-                     </div>
-                     <GitCompare size={16} className="text-slate-600 mt-1"/>
+                    </div>
                 </div>
-                <div className="text-center w-1/3">
-                    <div className="text-xs text-slate-400 mb-1">เปรียบเทียบกับ</div>
-                    <div className="text-blue-400 font-bold text-lg">{target.name}</div>
-                    <div className="text-2xl font-black text-white">{target.rating.toFixed(2)}</div>
+                <div className="flex flex-col items-center gap-2">
+                    <span className="text-xs text-slate-400 bg-slate-800/50 px-2 py-1 rounded-full border border-white/5">เป้าหมาย</span>
+                    <PlayerCard rating={target.rating} position={target.position} name={target.name} small />
                 </div>
             </div>
 
-            <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                <h4 className="text-xs text-slate-400 uppercase tracking-wider mb-2">ค่าพลังที่มีผลมากที่สุด</h4>
+            <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar bg-slate-800/20 p-3 rounded-xl border border-white/5">
+                <h4 className="text-xs text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2"><Activity size={12}/> เปรียบเทียบค่าพลัง (Top Factors)</h4>
                 {positionFactors.map((factor) => {
                     const currentVal = calculateStat(current.inputs, current.tcState, factor.key);
                     const targetVal = calculateStat(target.inputs, target.tcState, factor.key);
-                    const statDiff = targetVal - currentVal;
+                    const statDiff = targetVal - currentVal; // statDiff > 0 means Target is better, < 0 means Current is better
 
                     return (
-                        <div key={factor.key} className="flex items-center text-xs p-2 rounded bg-white/5">
-                            <div className="w-24 text-slate-300 truncate">{factor.key}</div>
-                            <div className="flex-1 flex items-center gap-2">
-                                <div className="text-right w-8 text-indigo-300 font-mono">{currentVal}</div>
-                                <div className="flex-1 h-1.5 bg-slate-700 rounded-full relative overflow-hidden">
-                                     <div className="absolute top-0 bottom-0 left-0 bg-indigo-500" style={{width: `${Math.min(100, (currentVal/150)*100)}%`}}></div>
-                                     <div className="absolute top-0 bottom-0 left-0 bg-blue-500 mix-blend-screen opacity-50" style={{width: `${Math.min(100, (targetVal/150)*100)}%`}}></div>
+                        <div key={factor.key} className="flex items-center text-xs p-2 rounded bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
+                            <div className="w-24 text-slate-300 truncate font-medium">{factor.key}</div>
+                            
+                            <div className="flex-1 flex items-center gap-3">
+                                {/* Current Side */}
+                                <div className="flex items-center justify-end w-16 gap-1">
+                                    {/* Show +diff only if current is better (statDiff < 0) */}
+                                    {statDiff < 0 && <span className="text-emerald-400 font-bold text-[10px]">+{Math.abs(statDiff)}</span>}
+                                    <div className={`text-right font-mono font-bold ${statDiff < 0 ? 'text-white' : 'text-slate-400'}`}>{currentVal}</div>
                                 </div>
-                                <div className="w-8 text-blue-300 font-mono">{targetVal}</div>
-                                <div className={`w-8 text-right font-bold ${statDiff > 0 ? 'text-green-400' : statDiff < 0 ? 'text-red-400' : 'text-slate-600'}`}>
-                                    {statDiff > 0 ? '+' : ''}{statDiff !== 0 ? statDiff : '-'}
+
+                                {/* Bar Area */}
+                                <div className="flex-1 h-2 bg-slate-800 rounded-full relative overflow-hidden flex items-center">
+                                     {/* Bar for Current (Sky Blue) */}
+                                     <div className="absolute top-0 bottom-0 left-0 bg-sky-500 opacity-80" style={{width: `${Math.min(100, (currentVal/150)*100)}%`, zIndex: currentVal < targetVal ? 2 : 1}}></div>
+                                     {/* Bar for Target (Rose Pink) */}
+                                     <div className="absolute top-0 bottom-0 left-0 bg-rose-500 opacity-80" style={{width: `${Math.min(100, (targetVal/150)*100)}%`, zIndex: targetVal < currentVal ? 2 : 1}}></div>
+                                </div>
+
+                                {/* Target Side */}
+                                <div className="flex items-center justify-start w-16 gap-1">
+                                    <div className={`text-left font-mono font-bold ${statDiff > 0 ? 'text-white' : 'text-slate-400'}`}>{targetVal}</div>
+                                    {/* Show +diff only if target is better (statDiff > 0) */}
+                                    {statDiff > 0 && <span className="text-emerald-400 font-bold text-[10px]">+{statDiff}</span>}
                                 </div>
                             </div>
                         </div>
