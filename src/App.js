@@ -172,9 +172,14 @@ const InputForm = ({ players, inputs, tcState, onInputChange, onTCToggle, tcCoun
                         </div>
                         <div className="flex items-center gap-2 mt-0.5">
                             <div className="relative flex-1">
-                                <input type="number" min="0" name={player.key} value={inputs[player.key] || ''} onChange={onInputChange} className={`w-full bg-slate-900/80 border text-white text-center rounded-lg py-1.5 focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 outline-none font-mono text-sm transition-all shadow-inner ${isTCActive ? 'border-indigo-500/30' : 'border-slate-700/80 group-hover:border-slate-600'}`} placeholder="0" />
+                                <input type="number" min="0" name={player.key} value={inputs[player.key] || ''} onChange={onInputChange} className={`w-full bg-slate-900/80 border text-white text-center rounded-lg py-1.5 focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 outline-none font-mono text-sm transition-all shadow-inner ${isTCActive ? 'border-indigo-500/30 pr-8' : 'border-slate-700/80 group-hover:border-slate-600'}`} placeholder="0" />
+                                {isTCActive && (
+                                    <div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-bold text-emerald-400 pointer-events-none drop-shadow-md">
+                                        +2
+                                    </div>
+                                )}
                             </div>
-                            <button type="button" onClick={() => canActivate && onTCToggle(player.key)} disabled={!canActivate} className={`relative w-12 h-[34px] rounded-lg flex items-center justify-center transition-all duration-300 ${isTCActive ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 scale-105 border border-transparent' : canActivate ? 'bg-slate-700/50 text-slate-400 border border-slate-700 hover:bg-slate-700 hover:text-slate-200' : 'bg-slate-800/50 text-slate-700 cursor-not-allowed border border-transparent'}`}>
+                            <button type="button" tabIndex={-1} onClick={() => canActivate && onTCToggle(player.key)} disabled={!canActivate} className={`relative w-12 h-[34px] rounded-lg flex items-center justify-center transition-all duration-300 outline-none focus:ring-0 ${isTCActive ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 scale-105 border border-transparent' : canActivate ? 'bg-slate-700/50 text-slate-400 border border-slate-700 hover:bg-slate-700 hover:text-slate-200' : 'bg-slate-800/50 text-slate-700 cursor-not-allowed border border-transparent'}`}>
                                 <span className="font-mono text-xs font-bold">{isTCActive ? '+2' : 'TC'}</span>
                             </button>
                         </div>
@@ -185,7 +190,7 @@ const InputForm = ({ players, inputs, tcState, onInputChange, onTCToggle, tcCoun
     );
 };
 
-const ResultDisplay = ({ calculatedValue, position, topFactors, strategies, activeStrategyId, onSelectStrategy, onApplyStrategy }) => {
+const ResultDisplay = ({ calculatedValue, position, topFactors, strategies, activeStrategyId, onSelectStrategy, onApplyStrategy, playerName }) => {
     const activeStrategy = strategies.find(s => s.id === activeStrategyId) || strategies[0];
     const bonusRating = calculateBonus(activeStrategy.candidates);
     const getRatingColor = (r) => r >= 90 ? 'text-emerald-400' : r >= 80 ? 'text-indigo-400' : r >= 70 ? 'text-amber-400' : 'text-slate-400';
@@ -203,7 +208,7 @@ const ResultDisplay = ({ calculatedValue, position, topFactors, strategies, acti
                         <span className="text-sm font-bold uppercase tracking-widest mt-1 opacity-90 font-kanit text-shadow">{position || 'POS'}</span>
                     </div>
                     <div className="mt-4 w-24 h-24 bg-black/40 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/10 z-10 shadow-inner"><User size={48} className="text-white/80" /></div>
-                    <div className="mt-auto mb-6 w-full text-center border-t border-white/10 pt-2 z-10"><span className="text-lg font-black uppercase tracking-[0.2em] drop-shadow-md font-kanit text-white/80">PLAYER</span></div>
+                    <div className="mt-auto mb-6 w-full text-center border-t border-white/10 pt-2 z-10"><span className="text-lg font-black uppercase tracking-[0.2em] drop-shadow-md font-kanit text-white/80">{playerName || 'PLAYER'}</span></div>
                 </div>
                 <div className="mt-6 text-center z-10">
                     <h3 className="text-3xl font-bold text-white mb-1 tracking-tight">{calculatedValue.toFixed(2)}</h3>
@@ -438,7 +443,7 @@ export default function App() {
 
             <header className="sticky top-0 z-20 backdrop-blur-xl bg-slate-900/80 border-b border-slate-800">
                 <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
-                    <div className="flex items-center gap-4"><div className="bg-indigo-600 p-2.5 rounded-xl shadow-lg shadow-indigo-600/20"><Calculator size={24} className="text-white" /></div><div><h1 className="text-xl font-bold tracking-tight text-white font-kanit">ระบบคำนวนอัพสเตตัสนักเตะ</h1><p className="text-xs text-slate-400 font-kanit">FUT Calculator TH</p></div></div>
+                    <div className="flex items-center gap-4"><div className="bg-indigo-600 p-2.5 rounded-xl shadow-lg shadow-indigo-600/20"><Calculator size={24} className="text-white" /></div><div><h1 className="text-xl font-bold tracking-tight text-white font-kanit">ระบบคำนวนอัพสเตตัสนักเตะ</h1><p className="text-xs text-slate-400 font-kanit">Dev by Jiw Jirakiat</p></div></div>
                     <button onClick={() => window.location.reload()} className="p-2.5 bg-slate-800 hover:bg-slate-700 rounded-full transition-colors text-slate-400 hover:text-white border border-slate-700"><RefreshCw size={20} /></button>
                 </div>
             </header>
@@ -466,7 +471,7 @@ export default function App() {
                             <div className="flex justify-between items-center mb-8 pb-4 border-b border-white/5">
                                 <div>
                                     <h2 className="text-2xl font-bold text-white flex items-center gap-3 font-kanit"><div className="p-2 rounded-xl" style={{ backgroundColor: `${positionColors[selectedPosition]}20` }}><Activity size={24} style={{ color: positionColors[selectedPosition] }} /></div>{selectedPosition} Stats</h2>
-                                    <div className="flex items-center gap-3 mt-2 ml-1"><span className="text-[10px] bg-black/30 px-3 py-1 rounded-full text-slate-400 font-kanit border border-white/5 flex items-center gap-2">TC Used: <div className="flex gap-0.5">{[...Array(5)].map((_, i) => (<div key={i} className={`w-1.5 h-1.5 rounded-full ${i < tcCount ? 'bg-indigo-500' : 'bg-slate-700'}`} />))}</div><span className={tcCount === 5 ? 'text-red-400' : 'text-indigo-400'}>{tcCount}/5</span></span></div>
+                                    <div className="flex items-center gap-3 mt-2 ml-1"><span className="text-[10px] bg-black/30 px-3 py-1 rounded-full text-slate-400 font-kanit border border-white/5 flex items-center gap-2">TC Used: <div className="flex gap-0.5">{[...Array(5)].map((_, i) => (<div key={i} className={`w-1.5 h-1.5 rounded-full ${i < tcCount ? 'bg-indigo-500' : 'bg-slate-700'}`} />))}</div><span className="text-indigo-400">{tcCount}/5</span></span></div>
                                 </div>
                                 <button onClick={toggleSortOrder} className="flex items-center gap-2 px-4 py-2 bg-slate-800/50 hover:bg-slate-800 text-xs rounded-xl transition-colors border border-slate-700 text-slate-300 font-kanit"><ArrowUpDown size={14} />{sortOrder === 'default' ? 'เรียงตามเกม' : 'เรียงตามความสำคัญ'}</button>
                             </div>
@@ -477,7 +482,7 @@ export default function App() {
 
                     <div className="md:col-span-3 space-y-6">
                         <div className="sticky top-24 space-y-6">
-                            <ResultDisplay calculatedValue={calculatedValue} position={selectedPosition} topFactors={topFactors} strategies={strategies} activeStrategyId={activeStrategyId} onSelectStrategy={setActiveStrategyId} onApplyStrategy={applyActiveStrategy} />
+                            <ResultDisplay calculatedValue={calculatedValue} position={selectedPosition} topFactors={topFactors} strategies={strategies} activeStrategyId={activeStrategyId} onSelectStrategy={setActiveStrategyId} onApplyStrategy={applyActiveStrategy} playerName={playerName} />
                             <SavedPlayersList savedPlayers={savedPlayers} onLoad={handleLoadPlayer} onDelete={handleDeletePlayer} activePlayerId={activePlayerId} />
                         </div>
                     </div>
