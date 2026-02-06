@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
     User, Activity, Shield, Target, Calculator, RefreshCw, ArrowUpDown, Zap, CheckCircle2, Flame, Crosshair, TrendingUp, Wind, Dna,
-    Goal, MapPin, CircleDot, ArrowBigUp, Lightbulb, Move, ArrowRightLeft, Rocket, Eye, CornerUpRight, Scissors, Footprints, Lock, Battery, ChevronsDown, Hand, Send, Sparkles, Save, Trash2, FolderOpen, PenLine, AlertCircle, FilePlus, ChevronRight, Eraser, GitCompare, X
+    Goal, MapPin, CircleDot, ArrowBigUp, Lightbulb, Move, ArrowRightLeft, Rocket, Eye, CornerUpRight, Scissors, Footprints, Lock, Battery, ChevronsDown, Hand, Send, Sparkles, Save, Trash2, FolderOpen, PenLine, AlertCircle, FilePlus, ChevronRight, Eraser, GitCompare, X, Bell, Hexagon, Moon, Sun
 } from 'lucide-react';
 
 // --- Configuration Data ---
@@ -67,146 +67,81 @@ const STRATEGY_DEFINITIONS = [
 
 const calculateBonus = (players) => players.reduce((sum, p) => sum + (p.value * 2), 0) / 100;
 
-// --- Custom Modal Component ---
-const Modal = ({ isOpen, type, title, message, onConfirm, onCancel, content }) => {
-    if (!isOpen) return null;
+// --- Helper: Calculate Group Stats for Radar ---
+const calculateGroupStats = (inputs, tcState, position) => {
+    const getValue = (key) => {
+        const val = inputs[key] ? parseFloat(inputs[key]) : 0;
+        const bonus = tcState[key] ? 2 : 0;
+        return val + bonus;
+    };
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
-            <div className={`bg-slate-900/90 border border-slate-700/50 rounded-2xl shadow-2xl ${content ? 'max-w-2xl' : 'max-w-sm'} w-full overflow-hidden transform scale-100 transition-all ring-1 ring-white/10`}>
-                <div className="p-6">
-                    <div className="flex items-center gap-3 mb-4">
-                        <div className={`p-3 rounded-full ${type === 'alert' ? 'bg-red-500/10 text-red-400 ring-1 ring-red-500/20' : type === 'compare' ? 'bg-blue-500/10 text-blue-400 ring-1 ring-blue-500/20' : 'bg-indigo-500/10 text-indigo-400 ring-1 ring-indigo-500/20'}`}>
-                            {type === 'alert' ? <AlertCircle size={24} /> : type === 'compare' ? <GitCompare size={24} /> : <CheckCircle2 size={24} />}
-                        </div>
-                        <h3 className="text-lg font-bold text-white font-kanit">{title}</h3>
-                        <button onClick={onCancel} className="ml-auto text-slate-400 hover:text-white"><X size={20} /></button>
-                    </div>
-                    {content ? content : (
-                        <p className="text-slate-300 text-sm font-kanit leading-relaxed mb-6 font-light">
-                            {message}
-                        </p>
-                    )}
-                    {!content && (
-                        <div className="flex gap-3 justify-end">
-                            {type === 'confirm' && (
-                                <button 
-                                    onClick={onCancel}
-                                    className="px-4 py-2 rounded-lg bg-slate-800 text-slate-300 text-sm font-kanit hover:bg-slate-700 transition-colors border border-slate-700"
-                                >
-                                    ยกเลิก
-                                </button>
-                            )}
-                            <button 
-                                onClick={onConfirm}
-                                className={`px-4 py-2 rounded-lg text-white text-sm font-kanit font-medium shadow-lg transition-all active:scale-95 ${type === 'alert' ? 'bg-red-500 hover:bg-red-600 shadow-red-500/20' : 'bg-indigo-500 hover:bg-indigo-600 shadow-indigo-500/20'}`}
-                            >
-                                ตกลง
-                            </button>
-                        </div>
-                    )}
-                </div>
-            </div>
-        </div>
-    );
-};
+    if (position === 'GK') {
+        return [
+            { label: 'DIV', value: getValue('พุ่งรับ') },
+            { label: 'HAN', value: getValue('รับบอล') },
+            { label: 'KIC', value: getValue('ส่งบอล') },
+            { label: 'REF', value: getValue('GK ปฏิกิริยา') },
+            { label: 'SPD', value: getValue('ความเร็ว') },
+            { label: 'POS', value: getValue('ยืนตำแหน่ง') }
+        ];
+    }
 
-// --- Sub-Components ---
+    // PAC
+    const pac = (getValue('ความเร็ว') + getValue('สปีดต้น')) / 2;
+    // SHO
+    const shoParams = ['จบสกอร์', 'พลังการยิง', 'ยิงไกล', 'วอลเลย์', 'ยืนตำแหน่ง'];
+    const sho = shoParams.reduce((a, b) => a + getValue(b), 0) / shoParams.length;
+    // PAS
+    const pasParams = ['ส่งสั้น', 'ส่งไกล', 'เปิดบอล', 'อ่านเกม', 'อ่านเกมส์'];
+    const pas = pasParams.reduce((a, b) => a + getValue(b), 0) / 4; 
+    // DRI
+    const driParams = ['เลี้ยงบอล', 'ควบคุมบอล', 'คล่องตัว', 'ปฏิกิริยา'];
+    const dri = driParams.reduce((a, b) => a + getValue(b), 0) / driParams.length;
+    // DEF
+    const defParams = ['เข้าสกัด', 'ประกบตัว', 'เข้าปะทะ', 'สไลด์'];
+    const def = defParams.reduce((a, b) => a + getValue(b), 0) / defParams.length;
+    // PHY
+    const phyParams = ['แข็งแกร่ง', 'ความอึด', 'ดุดัน', 'กระโดด', 'โหม่งบอล'];
+    const phy = phyParams.reduce((a, b) => a + getValue(b), 0) / phyParams.length;
 
-const PositionSelector = ({ selectedPosition, onSelectPosition }) => {
-    const positionGroups = [
-        { title: 'กองหน้า', positions: ['ST', 'CF'] },
-        { title: 'ปีก', positions: ['LW/RW', 'LM/RM'] },
-        { title: 'กองกลาง', positions: ['CAM', 'CM', 'CDM'] },
-        { title: 'กองหลัง', positions: ['LWB/RWB', 'LB/RB', 'CB'] },
-        { title: 'ผู้รักษาประตู', positions: ['GK'] },
+    return [
+        { label: 'PAC', value: pac || 0 },
+        { label: 'SHO', value: sho || 0 },
+        { label: 'PAS', value: pas || 0 },
+        { label: 'DRI', value: dri || 0 },
+        { label: 'DEF', value: def || 0 },
+        { label: 'PHY', value: phy || 0 }
     ];
-
-    return (
-        <div className="space-y-5">
-            {positionGroups.map((group) => (
-                <div key={group.title}>
-                    <h3 className="text-xs font-medium text-slate-400 mb-2.5 uppercase tracking-wider pl-1 font-kanit flex items-center gap-2">
-                        <span className="w-1 h-1 rounded-full bg-slate-500"></span>
-                        {group.title}
-                    </h3>
-                    <div className="grid grid-cols-2 gap-2.5">
-                        {group.positions.map((pos) => {
-                            const isSelected = selectedPosition === pos;
-                            return (
-                                <button
-                                    key={pos}
-                                    onClick={() => onSelectPosition(pos)}
-                                    className={`px-3 py-2.5 text-sm rounded-xl border transition-all duration-300 font-bold font-kanit relative overflow-hidden group ${isSelected ? 'text-white border-transparent shadow-lg shadow-black/20' : 'bg-slate-800/40 border-slate-700/50 text-slate-400 hover:bg-slate-800 hover:border-slate-600 hover:text-slate-200'}`}
-                                    style={isSelected ? { background: `linear-gradient(135deg, ${positionColors[pos]} 0%, #1e293b 100%)` } : {}}
-                                >
-                                    {isSelected && <div className="absolute inset-0 bg-white/10 blur-sm group-hover:bg-white/20 transition-all"></div>}
-                                    <span className="relative z-10 flex items-center justify-center gap-1.5">
-                                        {pos}
-                                        {isSelected && <ChevronRight size={14} className="opacity-70" />}
-                                    </span>
-                                </button>
-                            );
-                        })}
-                    </div>
-                </div>
-            ))}
-        </div>
-    );
 };
 
-const InputForm = ({ players, inputs, tcState, onInputChange, onTCToggle, tcCount, onReset }) => {
-    return (
-        <div>
-            <div className="flex justify-end mb-4">
-                <button 
-                    onClick={onReset}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-red-500/10 text-red-400 rounded-lg text-xs font-kanit hover:bg-red-500/20 border border-red-500/20 transition-all"
-                >
-                    <Eraser size={14} /> ล้างค่าพลัง
-                </button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {players.map((player) => {
-                    const isTCActive = tcState[player.key];
-                    const canActivate = tcCount < 5 || isTCActive;
-                    const StatIcon = STAT_ICONS[player.key] || Activity; 
-                    return (
-                        <div key={player.key} className={`relative p-3 rounded-xl border transition-all duration-300 flex flex-col justify-between gap-2.5 group ${isTCActive ? 'bg-indigo-500/10 border-indigo-500/40' : 'bg-slate-800/30 border-slate-700/40 hover:border-slate-600 hover:bg-slate-800/50'}`}>
-                            <div className="flex justify-between items-start">
-                                <label className={`text-sm font-medium font-kanit flex items-center gap-2.5 transition-colors ${isTCActive ? 'text-indigo-300' : 'text-slate-300 group-hover:text-slate-200'}`}>
-                                    <div className={`p-1.5 rounded-lg transition-colors ${isTCActive ? 'bg-indigo-500/20 text-indigo-400' : 'bg-slate-700/50 text-slate-500 group-hover:bg-slate-700 group-hover:text-slate-400'}`}>
-                                        <StatIcon size={14} />
-                                    </div>
-                                    {player.key}
-                                </label>
-                                <span className={`text-[10px] font-kanit px-2 py-0.5 rounded-full border ${isTCActive ? 'bg-indigo-500/20 border-indigo-500/20 text-indigo-300' : 'bg-slate-900/50 border-slate-700 text-slate-500'}`}>
-                                    {player.value}%
-                                </span>
-                            </div>
-                            <div className="flex items-center gap-2 mt-0.5">
-                                <div className="relative flex-1">
-                                    <input type="number" min="0" name={player.key} value={inputs[player.key] || ''} onChange={onInputChange} className={`w-full bg-slate-900/80 border text-white text-center rounded-lg py-1.5 focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 outline-none font-mono text-sm transition-all shadow-inner ${isTCActive ? 'border-indigo-500/30 pr-8' : 'border-slate-700/80 group-hover:border-slate-600'}`} placeholder="0" />
-                                    {isTCActive && (
-                                        <div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-bold text-emerald-400 pointer-events-none drop-shadow-md">
-                                            +2
-                                        </div>
-                                    )}
-                                </div>
-                                <button type="button" tabIndex={-1} onClick={() => canActivate && onTCToggle(player.key)} disabled={!canActivate} className={`relative w-12 h-[34px] rounded-lg flex items-center justify-center transition-all duration-300 outline-none focus:ring-0 ${isTCActive ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 scale-105 border border-transparent' : canActivate ? 'bg-slate-700/50 text-slate-400 border border-slate-700 hover:bg-slate-700 hover:text-slate-200' : 'bg-slate-800/50 text-slate-700 cursor-not-allowed border border-transparent'}`}>
-                                    <span className="font-mono text-xs font-bold">{isTCActive ? '+2' : 'TC'}</span>
-                                </button>
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
-        </div>
-    );
+// --- Archetype Logic ---
+const getArchetype = (inputs, tcState) => {
+    const getValue = (key) => (inputs[key] || 0) + (tcState[key] ? 2 : 0);
+    
+    const speed = Math.max(getValue("ความเร็ว"), getValue("สปีดต้น"));
+    const shooting = Math.max(getValue("จบสกอร์"), getValue("พลังการยิง"), getValue("ยิงไกล"));
+    const defense = Math.max(getValue("เข้าสกัด"), getValue("เข้าปะทะ"), getValue("ประกบตัว"));
+    const passing = Math.max(getValue("ส่งสั้น"), getValue("ส่งไกล"), getValue("เปิดบอล"));
+    const dribbling = Math.max(getValue("เลี้ยงบอล"), getValue("ควบคุมบอล"), getValue("คล่องตัว"));
+    const physical = Math.max(getValue("แข็งแกร่ง"), getValue("ความอึด"), getValue("ดุดัน"));
+    const gk = Math.max(getValue("พุ่งรับ"), getValue("รับบอล"));
+
+    if (gk > 85) return "The Wall (จอมหนึบ)";
+    if (speed > 90) return "Speedster (จรวดทางเรียบ)";
+    if (shooting > 90) return "Sniper (เพชฌฆาต)";
+    if (defense > 90) return "Iron Defense (กำแพงเหล็ก)";
+    if (passing > 90) return "Maestro (จอมทัพ)";
+    if (dribbling > 90) return "Wizard (พ่อมดลูกหนัง)";
+    if (physical > 90) return "Tank (รถถัง)";
+    
+    if (speed > 80 && dribbling > 80) return "Winger (ปีกจรวจ)";
+    if (shooting > 80 && physical > 80) return "Target Man (หน้าเป้า)";
+    
+    return "Prospect (ดาวรุ่ง)";
 };
 
-// New Reusable PlayerCard Component
-const PlayerCard = ({ rating, position, name, small = false }) => {
+// --- Reusable PlayerCard Component (Hoisted to top) ---
+const PlayerCard = ({ rating, position, name, archetype, small = false }) => {
     const getCardColor = (r) => {
         if (r >= 140) return 'from-fuchsia-600 via-purple-600 to-indigo-900 border-fuchsia-500/50 shadow-[0_0_30px_rgba(192,38,211,0.3)]'; // Icon
         if (r >= 130) return 'from-yellow-300 via-amber-500 to-amber-700 border-amber-400/50 shadow-[0_0_20px_rgba(245,158,11,0.3)]'; // Gold
@@ -246,12 +181,309 @@ const PlayerCard = ({ rating, position, name, small = false }) => {
             
             <div className="mt-auto mb-4 w-full text-center border-t border-white/10 pt-1 z-10">
                 <span className={`${nameSize} font-black uppercase tracking-[0.2em] drop-shadow-md font-kanit text-white/80 truncate px-2 block`}>{name || 'PLAYER'}</span>
+                {archetype && !small && <span className="text-[10px] uppercase tracking-wider text-white/60 font-kanit block mt-0.5">{archetype}</span>}
             </div>
         </div>
     );
 };
 
-const ResultDisplay = ({ calculatedValue, position, topFactors, strategies, activeStrategyId, onSelectStrategy, onApplyStrategy, playerName }) => {
+// --- Toast Component ---
+const ToastContainer = ({ toasts, removeToast, isDarkMode }) => {
+    return (
+        <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
+            {toasts.map((toast) => (
+                <div key={toast.id} className={`flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg shadow-black/20 animate-in slide-in-from-right duration-300 border ${isDarkMode ? 'bg-slate-800/90 border-indigo-500/30 text-white' : 'bg-white/90 border-indigo-200 text-gray-800'}`}>
+                    <div className={`p-1.5 rounded-full ${isDarkMode ? 'bg-indigo-500/20 text-indigo-400' : 'bg-indigo-100 text-indigo-600'}`}>
+                        {toast.type === 'success' ? <CheckCircle2 size={18} /> : <Bell size={18} />}
+                    </div>
+                    <span className="text-sm font-kanit">{toast.message}</span>
+                    <button onClick={() => removeToast(toast.id)} className={`ml-2 ${isDarkMode ? 'text-slate-500 hover:text-white' : 'text-gray-400 hover:text-gray-700'}`}><X size={14} /></button>
+                </div>
+            ))}
+        </div>
+    );
+};
+
+// --- Custom Modal Component ---
+const Modal = ({ isOpen, type, title, message, onConfirm, onCancel, content, isDarkMode }) => {
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
+            <div className={`${isDarkMode ? 'bg-slate-900/90 border-slate-700/50' : 'bg-white/95 border-gray-200'} border rounded-2xl shadow-2xl ${content ? 'max-w-2xl' : 'max-w-sm'} w-full overflow-hidden transform scale-100 transition-all ring-1 ring-black/5`}>
+                <div className="p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className={`p-3 rounded-full ${type === 'alert' ? (isDarkMode ? 'bg-red-500/10 text-red-400 ring-1 ring-red-500/20' : 'bg-red-100 text-red-600') : type === 'compare' ? (isDarkMode ? 'bg-blue-500/10 text-blue-400 ring-1 ring-blue-500/20' : 'bg-blue-100 text-blue-600') : (isDarkMode ? 'bg-indigo-500/10 text-indigo-400 ring-1 ring-indigo-500/20' : 'bg-indigo-100 text-indigo-600')}`}>
+                            {type === 'alert' ? <AlertCircle size={24} /> : type === 'compare' ? <GitCompare size={24} /> : <CheckCircle2 size={24} />}
+                        </div>
+                        <h3 className={`text-lg font-bold font-kanit ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>{title}</h3>
+                        <button onClick={onCancel} className={`ml-auto ${isDarkMode ? 'text-slate-400 hover:text-white' : 'text-gray-400 hover:text-gray-700'}`}><X size={20} /></button>
+                    </div>
+                    {content ? content : (
+                        <p className={`text-sm font-kanit leading-relaxed mb-6 font-light ${isDarkMode ? 'text-slate-300' : 'text-gray-600'}`}>
+                            {message}
+                        </p>
+                    )}
+                    {!content && (
+                        <div className="flex gap-3 justify-end">
+                            {type === 'confirm' && (
+                                <button 
+                                    onClick={onCancel}
+                                    className={`px-4 py-2 rounded-lg text-sm font-kanit transition-colors border ${isDarkMode ? 'bg-slate-800 text-slate-300 hover:bg-slate-700 border-slate-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-200'}`}
+                                >
+                                    ยกเลิก
+                                </button>
+                            )}
+                            <button 
+                                onClick={onConfirm}
+                                className={`px-4 py-2 rounded-lg text-white text-sm font-kanit font-medium shadow-lg transition-all active:scale-95 ${type === 'alert' ? 'bg-red-500 hover:bg-red-600 shadow-red-500/20' : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-500/20'}`}
+                            >
+                                ตกลง
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// --- Radar Chart Component ---
+const RadarChart = ({ stats, size = 200, color = "#10b981", isDarkMode }) => {
+    const radius = size / 2;
+    const center = size / 2;
+    const scale = radius - 30; // Margin for labels
+
+    // Calculate points for the polygon
+    const points = stats.map((stat, i) => {
+        const angle = (Math.PI * 2 * i) / 6 - Math.PI / 2;
+        const r = (Math.min(stat.value, 120) / 120) * scale; // Max stat 120 for scaling
+        const x = center + r * Math.cos(angle);
+        const y = center + r * Math.sin(angle);
+        return `${x},${y}`;
+    }).join(' ');
+
+    // Calculate points for background webs
+    const getWebPoints = (level) => {
+        return stats.map((_, i) => {
+            const angle = (Math.PI * 2 * i) / 6 - Math.PI / 2;
+            const r = (level / 5) * scale;
+            const x = center + r * Math.cos(angle);
+            const y = center + r * Math.sin(angle);
+            return `${x},${y}`;
+        }).join(' ');
+    };
+
+    const lineColor = isDarkMode ? "#334155" : "#e2e8f0";
+    const labelColor = isDarkMode ? "#94a3b8" : "#64748b";
+
+    return (
+        <div className="relative flex justify-center items-center">
+            <svg width={size} height={size} className="overflow-visible">
+                {/* Background Webs */}
+                {[1, 2, 3, 4, 5].map(level => (
+                    <polygon 
+                        key={level} 
+                        points={getWebPoints(level)} 
+                        fill="none" 
+                        stroke={lineColor}
+                        strokeWidth="1"
+                    />
+                ))}
+                
+                {/* Axis Lines */}
+                {stats.map((_, i) => {
+                    const angle = (Math.PI * 2 * i) / 6 - Math.PI / 2;
+                    const x = center + scale * Math.cos(angle);
+                    const y = center + scale * Math.sin(angle);
+                    return <line key={i} x1={center} y1={center} x2={x} y2={y} stroke={lineColor} strokeWidth="1" />;
+                })}
+
+                {/* Data Polygon */}
+                <polygon 
+                    points={points} 
+                    fill={color} 
+                    fillOpacity="0.3" 
+                    stroke={color} 
+                    strokeWidth="2"
+                />
+
+                {/* Labels */}
+                {stats.map((stat, i) => {
+                    const angle = (Math.PI * 2 * i) / 6 - Math.PI / 2;
+                    const x = center + (scale + 15) * Math.cos(angle);
+                    const y = center + (scale + 15) * Math.sin(angle);
+                    return (
+                        <text 
+                            key={i} 
+                            x={x} 
+                            y={y} 
+                            textAnchor="middle" 
+                            alignmentBaseline="middle" 
+                            fill={labelColor}
+                            fontSize="10" 
+                            fontWeight="bold"
+                            fontFamily="Kanit"
+                        >
+                            {stat.label}
+                        </text>
+                    );
+                })}
+            </svg>
+        </div>
+    );
+};
+
+// --- Sub-Components ---
+
+const PositionSelector = ({ selectedPosition, onSelectPosition, isDarkMode }) => {
+    const positionGroups = [
+        { title: 'กองหน้า', positions: ['ST', 'CF'] },
+        { title: 'ปีก', positions: ['LW/RW', 'LM/RM'] },
+        { title: 'กองกลาง', positions: ['CAM', 'CM', 'CDM'] },
+        { title: 'กองหลัง', positions: ['LWB/RWB', 'LB/RB', 'CB'] },
+        { title: 'ผู้รักษาประตู', positions: ['GK'] },
+    ];
+
+    return (
+        <div className="space-y-5">
+            {positionGroups.map((group) => (
+                <div key={group.title}>
+                    <h3 className={`text-xs font-medium mb-2.5 uppercase tracking-wider pl-1 font-kanit flex items-center gap-2 ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>
+                        <span className={`w-1 h-1 rounded-full ${isDarkMode ? 'bg-slate-500' : 'bg-gray-400'}`}></span>
+                        {group.title}
+                    </h3>
+                    <div className="grid grid-cols-2 gap-2.5">
+                        {group.positions.map((pos) => {
+                            const isSelected = selectedPosition === pos;
+                            return (
+                                <button
+                                    key={pos}
+                                    onClick={() => onSelectPosition(pos)}
+                                    className={`px-3 py-2.5 text-sm rounded-xl border transition-all duration-300 font-bold font-kanit relative overflow-hidden group 
+                                    ${isSelected 
+                                        ? 'text-white border-transparent shadow-lg shadow-black/20' 
+                                        : isDarkMode 
+                                            ? 'bg-slate-800/40 border-slate-700/50 text-slate-400 hover:bg-slate-800 hover:border-slate-600 hover:text-slate-200' 
+                                            : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700 hover:border-gray-300'
+                                    }`}
+                                    style={isSelected ? { background: `linear-gradient(135deg, ${positionColors[pos]} 0%, ${isDarkMode ? '#1e293b' : '#64748b'} 100%)` } : {}}
+                                >
+                                    {isSelected && <div className="absolute inset-0 bg-white/10 blur-sm group-hover:bg-white/20 transition-all"></div>}
+                                    <span className="relative z-10 flex items-center justify-center gap-1.5">
+                                        {pos}
+                                        {isSelected && <ChevronRight size={14} className="opacity-70" />}
+                                    </span>
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+};
+
+const InputForm = ({ players, inputs, tcState, onInputChange, onTCToggle, tcCount, onReset, isDarkMode }) => {
+    return (
+        <div>
+            <div className="flex justify-end mb-4">
+                <button 
+                    onClick={onReset}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-kanit transition-all border
+                        ${isDarkMode 
+                            ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20 border-red-500/20' 
+                            : 'bg-red-50 text-red-600 hover:bg-red-100 border-red-100'
+                        }`}
+                >
+                    <Eraser size={14} /> ล้างค่าพลัง
+                </button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {players.map((player) => {
+                    const isTCActive = tcState[player.key];
+                    const canActivate = tcCount < 5 || isTCActive;
+                    const StatIcon = STAT_ICONS[player.key] || Activity; 
+                    return (
+                        <div key={player.key} className={`relative p-3 rounded-xl border transition-all duration-300 flex flex-col justify-between gap-2.5 group 
+                            ${isTCActive 
+                                ? (isDarkMode ? 'bg-indigo-500/10 border-indigo-500/40' : 'bg-indigo-50 border-indigo-200') 
+                                : (isDarkMode 
+                                    ? 'bg-slate-800/30 border-slate-700/40 hover:border-slate-600 hover:bg-slate-800/50' 
+                                    : 'bg-white border-gray-200 hover:border-indigo-200 hover:shadow-sm')
+                            }`}>
+                            <div className="flex justify-between items-start">
+                                <label className={`text-sm font-medium font-kanit flex items-center gap-2.5 transition-colors 
+                                    ${isTCActive 
+                                        ? (isDarkMode ? 'text-indigo-300' : 'text-indigo-700') 
+                                        : (isDarkMode ? 'text-slate-300 group-hover:text-slate-200' : 'text-gray-600 group-hover:text-gray-900')
+                                    }`}>
+                                    <div className={`p-1.5 rounded-lg transition-colors 
+                                        ${isTCActive 
+                                            ? (isDarkMode ? 'bg-indigo-500/20 text-indigo-400' : 'bg-indigo-100 text-indigo-600') 
+                                            : (isDarkMode ? 'bg-slate-700/50 text-slate-500 group-hover:bg-slate-700 group-hover:text-slate-400' : 'bg-gray-100 text-gray-400 group-hover:bg-gray-200 group-hover:text-gray-600')
+                                        }`}>
+                                        <StatIcon size={14} />
+                                    </div>
+                                    {player.key}
+                                </label>
+                                <span className={`text-[10px] font-kanit px-2 py-0.5 rounded-full border 
+                                    ${isTCActive 
+                                        ? (isDarkMode ? 'bg-indigo-500/20 border-indigo-500/20 text-indigo-300' : 'bg-indigo-100 border-indigo-200 text-indigo-700') 
+                                        : (isDarkMode ? 'bg-slate-900/50 border-slate-700 text-slate-500' : 'bg-gray-50 border-gray-200 text-gray-400')
+                                    }`}>
+                                    {player.value}%
+                                </span>
+                            </div>
+                            <div className="flex items-center gap-2 mt-0.5">
+                                <div className="relative flex-1">
+                                    <input 
+                                        type="number" 
+                                        min="0" 
+                                        // max="99" removed
+                                        name={player.key} 
+                                        value={inputs[player.key] || ''} 
+                                        onChange={onInputChange} 
+                                        className={`w-full border text-center rounded-lg py-1.5 outline-none font-mono text-sm transition-all shadow-inner focus:ring-2 
+                                            ${isDarkMode 
+                                                ? 'bg-slate-900/80 text-white focus:ring-indigo-500/50 focus:border-indigo-500/50 border-slate-700/80 group-hover:border-slate-600' 
+                                                : 'bg-gray-50 text-gray-900 focus:ring-indigo-200 focus:border-indigo-400 border-gray-200 group-hover:border-gray-300'
+                                            }
+                                            ${isTCActive ? (isDarkMode ? 'border-indigo-500/30 pr-8' : 'border-indigo-300 bg-white pr-8') : ''}
+                                        `} 
+                                        placeholder="0" 
+                                    />
+                                    {isTCActive && (
+                                        <div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-bold text-emerald-500 pointer-events-none drop-shadow-sm">
+                                            +2
+                                        </div>
+                                    )}
+                                </div>
+                                <button 
+                                    type="button" 
+                                    tabIndex={-1} 
+                                    onClick={() => canActivate && onTCToggle(player.key)} 
+                                    disabled={!canActivate} 
+                                    className={`relative w-12 h-[34px] rounded-lg flex items-center justify-center transition-all duration-300 outline-none focus:ring-0 border
+                                        ${isTCActive 
+                                            ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 scale-105 border-transparent' 
+                                            : canActivate 
+                                                ? (isDarkMode ? 'bg-slate-700/50 text-slate-400 border-slate-700 hover:bg-slate-700 hover:text-slate-200' : 'bg-white text-gray-400 border-gray-200 hover:bg-gray-50 hover:text-gray-600') 
+                                                : (isDarkMode ? 'bg-slate-800/50 text-slate-700 cursor-not-allowed border-transparent' : 'bg-gray-100 text-gray-300 cursor-not-allowed border-transparent')
+                                        }`}
+                                >
+                                    <span className="font-mono text-xs font-bold">{isTCActive ? '+2' : 'TC'}</span>
+                                </button>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+};
+
+const ResultDisplay = ({ calculatedValue, position, topFactors, strategies, activeStrategyId, onSelectStrategy, onApplyStrategy, playerName, archetype, radarStats, isDarkMode }) => {
     const activeStrategy = strategies.find(s => s.id === activeStrategyId) || strategies[0];
     const bonusRating = calculateBonus(activeStrategy.candidates);
     
@@ -261,57 +493,96 @@ const ResultDisplay = ({ calculatedValue, position, topFactors, strategies, acti
 
     return (
         <div className="space-y-6">
-            <div className="flex flex-col items-center justify-center p-6 bg-slate-800/30 rounded-3xl border border-white/5 backdrop-blur-md relative overflow-hidden group">
+            <div className={`flex flex-col items-center justify-center p-6 rounded-3xl border backdrop-blur-md relative overflow-hidden group transition-colors
+                ${isDarkMode ? 'bg-slate-800/30 border-white/5' : 'bg-white/60 border-white shadow-xl shadow-indigo-100/50'}`}>
                 <div className="group-hover:scale-105 transition-transform duration-500">
-                    <PlayerCard rating={calculatedValue} position={position} name={playerName} />
+                    <PlayerCard rating={calculatedValue} position={position} name={playerName} archetype={archetype} />
                 </div>
                 
                 <div className="mt-6 text-center z-10 w-full px-6">
-                    <h3 className="text-3xl font-bold text-white mb-1 tracking-tight">{calculatedValue.toFixed(2)}</h3>
+                    <h3 className={`text-3xl font-bold mb-1 tracking-tight ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>{calculatedValue.toFixed(2)}</h3>
                     
                     {/* Decimal Progress Bar */}
-                    <div className="w-full h-1.5 bg-slate-700 rounded-full mt-2 mb-1 overflow-hidden">
+                    <div className={`w-full h-1.5 rounded-full mt-2 mb-1 overflow-hidden ${isDarkMode ? 'bg-slate-700' : 'bg-gray-200'}`}>
                         <div className="h-full bg-emerald-500 transition-all duration-500" style={{ width: `${progressPercent}%` }}></div>
                     </div>
-                    <div className="flex justify-between text-[10px] text-slate-500 font-kanit">
+                    <div className={`flex justify-between text-[10px] font-kanit ${isDarkMode ? 'text-slate-500' : 'text-gray-500'}`}>
                         <span>{Math.floor(calculatedValue)}</span>
-                        <span className="text-emerald-400">{progressPercent.toFixed(0)}% to next</span>
+                        <span className="text-emerald-500">{progressPercent.toFixed(0)}% to next</span>
                         <span>{Math.floor(calculatedValue) + 1}</span>
                     </div>
                 </div>
             </div>
 
-            <div className="bg-slate-800/30 border border-white/5 rounded-2xl p-5 backdrop-blur-md">
-                <div className="flex items-center gap-2.5 mb-4"><div className="p-1.5 bg-indigo-500/20 rounded-lg text-indigo-400"><Flame size={18} /></div><h3 className="text-sm font-bold text-slate-200 font-kanit">แนะนำสูตรอัพพลัง TC</h3></div>
+            <div className={`rounded-2xl p-5 backdrop-blur-md border transition-colors ${isDarkMode ? 'bg-slate-800/30 border-white/5' : 'bg-white/60 border-white shadow-lg shadow-indigo-50/50'}`}>
+                <div className="flex items-center gap-2.5 mb-4">
+                    <div className={`p-1.5 rounded-lg ${isDarkMode ? 'bg-sky-500/20 text-sky-400' : 'bg-sky-100 text-sky-600'}`}><Hexagon size={18} /></div>
+                    <h3 className={`text-sm font-bold font-kanit ${isDarkMode ? 'text-slate-200' : 'text-gray-800'}`}>วิเคราะห์ทรงบอล (Style)</h3>
+                </div>
+                <div className="flex justify-center pb-2">
+                    <RadarChart stats={radarStats} size={200} color="#0ea5e9" isDarkMode={isDarkMode} />
+                </div>
+            </div>
+
+            <div className={`rounded-2xl p-5 backdrop-blur-md border transition-colors ${isDarkMode ? 'bg-slate-800/30 border-white/5' : 'bg-white/60 border-white shadow-lg shadow-indigo-50/50'}`}>
+                <div className="flex items-center gap-2.5 mb-4">
+                    <div className={`p-1.5 rounded-lg ${isDarkMode ? 'bg-indigo-500/20 text-indigo-400' : 'bg-indigo-100 text-indigo-600'}`}><Flame size={18} /></div>
+                    <h3 className={`text-sm font-bold font-kanit ${isDarkMode ? 'text-slate-200' : 'text-gray-800'}`}>แนะนำสูตรอัพพลัง TC</h3>
+                </div>
                 <div className="flex flex-wrap gap-2 mb-4">
                     {strategies.map(s => {
                         const Icon = s.icon;
                         const isActive = s.id === activeStrategyId;
                         return (
-                            <button key={s.id} onClick={() => onSelectStrategy(s.id)} className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-[10px] font-kanit transition-all border ${isActive ? 'bg-indigo-600 text-white border-indigo-500 font-medium shadow-lg shadow-indigo-500/20' : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700 hover:text-slate-200'}`}>
+                            <button key={s.id} onClick={() => onSelectStrategy(s.id)} className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-[10px] font-kanit transition-all border 
+                                ${isActive 
+                                    ? 'bg-indigo-600 text-white border-indigo-500 font-medium shadow-lg shadow-indigo-500/20' 
+                                    : (isDarkMode ? 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700 hover:text-slate-200' : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50 hover:text-gray-800 hover:border-gray-300')
+                                }`}>
                                 <Icon size={12} /> {s.name}
                             </button>
                         );
                     })}
                 </div>
-                <div className="bg-slate-900/50 rounded-xl p-4 border border-white/5 relative overflow-hidden">
+                <div className={`rounded-xl p-4 border relative overflow-hidden ${isDarkMode ? 'bg-slate-900/50 border-white/5' : 'bg-white border-gray-100'}`}>
                     <div className="flex justify-between items-start mb-3 relative z-10">
-                        <div><h4 className="text-indigo-400 text-sm font-bold font-kanit flex items-center gap-2">{activeStrategy.name}<span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full font-mono border border-emerald-500/20">+{bonusRating.toFixed(2)} OVR</span></h4><p className="text-[10px] text-slate-500 mt-1 font-kanit leading-relaxed font-light">{activeStrategy.description}</p></div>
+                        <div>
+                            <h4 className={`text-sm font-bold font-kanit flex items-center gap-2 ${isDarkMode ? 'text-indigo-400' : 'text-indigo-700'}`}>
+                                {activeStrategy.name}
+                                <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono border ${isDarkMode ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>+{bonusRating.toFixed(2)} OVR</span>
+                            </h4>
+                            <p className={`text-[10px] mt-1 font-kanit leading-relaxed font-light ${isDarkMode ? 'text-slate-500' : 'text-gray-500'}`}>{activeStrategy.description}</p>
+                        </div>
                     </div>
                     <div className="space-y-2 mb-4 relative z-10">
                         {activeStrategy.candidates.map((p, i) => (
-                            <div key={i} className="flex justify-between items-center text-[10px] p-1.5 rounded bg-white/5 border border-white/5"><span className="text-slate-300 font-kanit flex items-center gap-2"><span className="w-4 h-4 flex items-center justify-center bg-slate-700 rounded-full text-[9px] font-bold text-slate-400">{i+1}</span>{p.key}</span><span className="text-slate-500 font-kanit">สำคัญ {p.value}%</span></div>
+                            <div key={i} className={`flex justify-between items-center text-[10px] p-1.5 rounded border ${isDarkMode ? 'bg-white/5 border-white/5' : 'bg-gray-50 border-gray-100'}`}>
+                                <span className={`font-kanit flex items-center gap-2 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>
+                                    <span className={`w-4 h-4 flex items-center justify-center rounded-full text-[9px] font-bold ${isDarkMode ? 'bg-slate-700 text-slate-400' : 'bg-gray-200 text-gray-500'}`}>{i+1}</span>{p.key}
+                                </span>
+                                <span className={`${isDarkMode ? 'text-slate-500' : 'text-gray-400'} font-kanit`}>สำคัญ {p.value}%</span>
+                            </div>
                         ))}
                     </div>
                     <button onClick={onApplyStrategy} className="w-full text-xs bg-indigo-600 text-white px-4 py-2.5 rounded-lg shadow-lg hover:shadow-indigo-500/20 hover:bg-indigo-500 transition-all flex items-center justify-center gap-2 font-kanit font-medium relative z-10"><CheckCircle2 size={14} /> ใช้สูตรนี้เลย</button>
                 </div>
             </div>
 
-            <div className="p-5 rounded-2xl bg-slate-800/30 border border-white/5 backdrop-blur-md">
-                <h3 className="text-sm font-bold text-slate-200 mb-4 flex items-center gap-2.5 font-kanit"><div className="p-1.5 bg-emerald-500/20 rounded-lg text-emerald-400"><Shield size={18} /></div>5 อันดับความสำคัญสูงสุด</h3>
+            <div className={`rounded-2xl p-5 backdrop-blur-md border transition-colors ${isDarkMode ? 'bg-slate-800/30 border-white/5' : 'bg-white/60 border-white shadow-lg shadow-indigo-50/50'}`}>
+                <h3 className={`text-sm font-bold mb-4 flex items-center gap-2.5 font-kanit ${isDarkMode ? 'text-slate-200' : 'text-gray-800'}`}>
+                    <div className={`p-1.5 rounded-lg ${isDarkMode ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-100 text-emerald-600'}`}><Shield size={18} /></div>
+                    5 อันดับความสำคัญสูงสุด
+                </h3>
                 <div className="space-y-2">
                     {topFactors.map((p, i) => (
-                        <div key={i} className="flex justify-between items-center text-xs p-2.5 rounded-lg bg-white/5 hover:bg-white/10 transition-colors border border-transparent hover:border-white/5"><div className="flex items-center gap-3"><span className={`w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold ${i === 0 ? 'bg-amber-500 text-black' : 'bg-slate-700 text-slate-400'}`}>{i+1}</span><span className="text-slate-300 font-kanit">{p.key}</span></div><span className="font-mono font-bold text-indigo-400">{p.value}%</span></div>
+                        <div key={i} className={`flex justify-between items-center text-xs p-2.5 rounded-lg transition-colors border border-transparent 
+                            ${isDarkMode ? 'bg-white/5 hover:bg-white/10 hover:border-white/5' : 'bg-white hover:bg-gray-50 hover:border-gray-200 shadow-sm'}`}>
+                            <div className="flex items-center gap-3">
+                                <span className={`w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold ${i === 0 ? 'bg-amber-500 text-black' : (isDarkMode ? 'bg-slate-700 text-slate-400' : 'bg-gray-200 text-gray-500')}`}>{i+1}</span>
+                                <span className={`font-kanit ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>{p.key}</span>
+                            </div>
+                            <span className={`font-mono font-bold ${isDarkMode ? 'text-indigo-400' : 'text-indigo-600'}`}>{p.value}%</span>
+                        </div>
                     ))}
                 </div>
             </div>
@@ -319,28 +590,42 @@ const ResultDisplay = ({ calculatedValue, position, topFactors, strategies, acti
     );
 };
 
-const SavedPlayersList = ({ savedPlayers, onLoad, onDelete, onCompare, activePlayerId }) => {
+const SavedPlayersList = ({ savedPlayers, onLoad, onDelete, onCompare, activePlayerId, isDarkMode }) => {
     if (savedPlayers.length === 0) return null;
 
     return (
-        <div className="p-5 rounded-2xl bg-slate-800/30 border border-white/5 backdrop-blur-md">
-            <h3 className="text-sm font-bold text-slate-200 mb-4 flex items-center gap-2.5 font-kanit"><div className="p-1.5 bg-amber-500/20 rounded-lg text-amber-400"><FolderOpen size={18} /></div>นักเตะที่บันทึกไว้ ({savedPlayers.length})</h3>
+        <div className={`rounded-2xl p-5 backdrop-blur-md border transition-colors ${isDarkMode ? 'bg-slate-800/30 border-white/5' : 'bg-white/60 border-white shadow-lg shadow-indigo-50/50'}`}>
+            <h3 className={`text-sm font-bold mb-4 flex items-center gap-2.5 font-kanit ${isDarkMode ? 'text-slate-200' : 'text-gray-800'}`}>
+                <div className={`p-1.5 rounded-lg ${isDarkMode ? 'bg-amber-500/20 text-amber-400' : 'bg-amber-100 text-amber-600'}`}><FolderOpen size={18} /></div>
+                นักเตะที่บันทึกไว้ ({savedPlayers.length})
+            </h3>
             <div className="space-y-2.5 max-h-[400px] overflow-y-auto pr-1 custom-scrollbar">
                 {savedPlayers.map((player) => (
-                    <div key={player.id} className={`flex items-center justify-between p-3 rounded-xl border transition-all group ${activePlayerId === player.id ? 'bg-indigo-500/10 border-indigo-500/40 shadow-inner' : 'bg-white/5 hover:bg-white/10 border-white/5'}`}>
+                    <div key={player.id} className={`flex items-center justify-between p-3 rounded-xl border transition-all group 
+                        ${activePlayerId === player.id 
+                            ? (isDarkMode ? 'bg-indigo-500/10 border-indigo-500/40 shadow-inner' : 'bg-indigo-50 border-indigo-200 shadow-inner') 
+                            : (isDarkMode ? 'bg-white/5 hover:bg-white/10 border-white/5' : 'bg-white border-gray-100 hover:border-indigo-200 hover:shadow-sm')
+                        }`}>
                         <div className="flex items-center gap-3.5 cursor-pointer flex-1" onClick={() => onLoad(player)}>
                             <div className="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold text-black shadow-lg ring-2 ring-white/10" style={{ background: `linear-gradient(135deg, ${positionColors[player.position]} 0%, #cbd5e1 100%)` }}>{player.position}</div>
                             <div>
-                                <h4 className={`text-sm font-bold font-kanit transition-colors flex items-center gap-2 ${activePlayerId === player.id ? 'text-indigo-300' : 'text-slate-200 group-hover:text-white'}`}>
+                                <h4 className={`text-sm font-bold font-kanit transition-colors flex items-center gap-2 
+                                    ${activePlayerId === player.id 
+                                        ? (isDarkMode ? 'text-indigo-300' : 'text-indigo-700') 
+                                        : (isDarkMode ? 'text-slate-200 group-hover:text-white' : 'text-gray-700 group-hover:text-black')
+                                    }`}>
                                     {player.name}
                                     {activePlayerId === player.id && <span className="text-[9px] bg-indigo-500 text-white px-1.5 py-0.5 rounded flex items-center gap-1 font-bold shadow-sm">แก้ไขอยู่</span>}
                                 </h4>
-                                <div className="flex items-center gap-2 mt-1"><span className="text-[10px] text-slate-400 font-mono bg-black/40 px-1.5 py-0.5 rounded border border-white/5">OVR {Math.floor(player.rating)}</span><span className="text-[10px] text-slate-600 font-light">{new Date(player.lastModified || player.id).toLocaleDateString()}</span></div>
+                                <div className="flex items-center gap-2 mt-1">
+                                    <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded border ${isDarkMode ? 'text-slate-400 bg-black/40 border-white/5' : 'text-gray-500 bg-gray-100 border-gray-200'}`}>OVR {Math.floor(player.rating)}</span>
+                                    <span className={`text-[10px] font-light ${isDarkMode ? 'text-slate-600' : 'text-gray-400'}`}>{new Date(player.lastModified || player.id).toLocaleDateString()}</span>
+                                </div>
                             </div>
                         </div>
                         <div className="flex items-center gap-1">
-                             <button onClick={() => onCompare(player)} className="p-2 text-slate-600 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors" title="เปรียบเทียบ"><GitCompare size={16} /></button>
-                             <button onClick={() => onDelete(player.id)} className="p-2 text-slate-600 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors" title="ลบ"><Trash2 size={16} /></button>
+                             <button onClick={() => onCompare(player)} className={`p-2 rounded-lg transition-colors ${isDarkMode ? 'text-slate-600 hover:text-blue-400 hover:bg-blue-500/10' : 'text-gray-400 hover:text-blue-600 hover:bg-blue-50'}`} title="เปรียบเทียบ"><GitCompare size={16} /></button>
+                             <button onClick={() => onDelete(player.id)} className={`p-2 rounded-lg transition-colors ${isDarkMode ? 'text-slate-600 hover:text-red-400 hover:bg-red-500/10' : 'text-gray-400 hover:text-red-600 hover:bg-red-50'}`} title="ลบ"><Trash2 size={16} /></button>
                         </div>
                     </div>
                 ))}
@@ -349,7 +634,7 @@ const SavedPlayersList = ({ savedPlayers, onLoad, onDelete, onCompare, activePla
     );
 };
 
-const CompareModalContent = ({ current, target, dataset }) => {
+const CompareModalContent = ({ current, target, dataset, isDarkMode }) => {
     // Helper to calculate stat value for a specific player setup
     const calculateStat = (inputs, tcState, key) => {
         const base = inputs[key] || 0;
@@ -366,53 +651,49 @@ const CompareModalContent = ({ current, target, dataset }) => {
         <div className="font-kanit">
              <div className="flex justify-around items-center mb-6">
                 <div className="flex flex-col items-center gap-2">
-                    <span className="text-xs text-slate-400 bg-slate-800/50 px-2 py-1 rounded-full border border-white/5">ปัจจุบัน</span>
+                    <span className={`text-xs px-2 py-1 rounded-full border ${isDarkMode ? 'text-slate-400 bg-slate-800/50 border-white/5' : 'text-gray-500 bg-gray-100 border-gray-200'}`}>ปัจจุบัน</span>
                     <PlayerCard rating={current.rating} position={current.position} name={current.name} small />
                 </div>
                 <div className="flex flex-col items-center gap-2">
-                    <span className="text-slate-500 font-bold text-3xl font-mono italic opacity-50">VS</span>
+                    <span className={`font-bold text-3xl font-mono italic opacity-50 ${isDarkMode ? 'text-slate-500' : 'text-gray-300'}`}>VS</span>
                     <div className={`text-sm font-bold px-3 py-1 rounded-full ${diff > 0 ? 'bg-rose-500/10 text-rose-400' : diff < 0 ? 'bg-sky-500/10 text-sky-400' : 'bg-slate-700 text-slate-300'}`}>
                         {diff > 0 ? '+' : ''}{diff.toFixed(2)}
                     </div>
                 </div>
                 <div className="flex flex-col items-center gap-2">
-                    <span className="text-xs text-slate-400 bg-slate-800/50 px-2 py-1 rounded-full border border-white/5">เป้าหมาย</span>
+                    <span className={`text-xs px-2 py-1 rounded-full border ${isDarkMode ? 'text-slate-400 bg-slate-800/50 border-white/5' : 'text-gray-500 bg-gray-100 border-gray-200'}`}>เป้าหมาย</span>
                     <PlayerCard rating={target.rating} position={target.position} name={target.name} small />
                 </div>
             </div>
 
-            <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar bg-slate-800/20 p-3 rounded-xl border border-white/5">
-                <h4 className="text-xs text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2"><Activity size={12}/> เปรียบเทียบค่าพลัง (Top Factors)</h4>
+            <div className={`space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar p-3 rounded-xl border ${isDarkMode ? 'bg-slate-800/20 border-white/5' : 'bg-gray-50 border-gray-200'}`}>
+                <h4 className={`text-xs uppercase tracking-wider mb-2 flex items-center gap-2 ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}><Activity size={12}/> เปรียบเทียบค่าพลัง (Top Factors)</h4>
                 {positionFactors.map((factor) => {
                     const currentVal = calculateStat(current.inputs, current.tcState, factor.key);
                     const targetVal = calculateStat(target.inputs, target.tcState, factor.key);
-                    const statDiff = targetVal - currentVal; // statDiff > 0 means Target is better, < 0 means Current is better
+                    const statDiff = targetVal - currentVal; 
 
                     return (
-                        <div key={factor.key} className="flex items-center text-xs p-2 rounded bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
-                            <div className="w-24 text-slate-300 truncate font-medium">{factor.key}</div>
+                        <div key={factor.key} className={`flex items-center text-xs p-2 rounded border transition-colors ${isDarkMode ? 'bg-white/5 border-white/5 hover:bg-white/10' : 'bg-white border-gray-100 hover:border-indigo-100'}`}>
+                            <div className={`w-24 truncate font-medium ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>{factor.key}</div>
                             
                             <div className="flex-1 flex items-center gap-3">
                                 {/* Current Side */}
                                 <div className="flex items-center justify-end w-16 gap-1">
-                                    {/* Show +diff only if current is better (statDiff < 0) */}
-                                    {statDiff < 0 && <span className="text-emerald-400 font-bold text-[10px]">+{Math.abs(statDiff)}</span>}
-                                    <div className={`text-right font-mono font-bold ${statDiff < 0 ? 'text-white' : 'text-slate-400'}`}>{currentVal}</div>
+                                    {statDiff < 0 && <span className="text-emerald-500 font-bold text-[10px]">+{Math.abs(statDiff)}</span>}
+                                    <div className={`text-right font-mono font-bold ${statDiff < 0 ? (isDarkMode ? 'text-white' : 'text-gray-900') : (isDarkMode ? 'text-slate-400' : 'text-gray-400')}`}>{currentVal}</div>
                                 </div>
 
                                 {/* Bar Area */}
-                                <div className="flex-1 h-2 bg-slate-800 rounded-full relative overflow-hidden flex items-center">
-                                     {/* Bar for Current (Sky Blue) */}
+                                <div className={`flex-1 h-2 rounded-full relative overflow-hidden flex items-center ${isDarkMode ? 'bg-slate-800' : 'bg-gray-200'}`}>
                                      <div className="absolute top-0 bottom-0 left-0 bg-sky-500 opacity-80" style={{width: `${Math.min(100, (currentVal/150)*100)}%`, zIndex: currentVal < targetVal ? 2 : 1}}></div>
-                                     {/* Bar for Target (Rose Pink) */}
                                      <div className="absolute top-0 bottom-0 left-0 bg-rose-500 opacity-80" style={{width: `${Math.min(100, (targetVal/150)*100)}%`, zIndex: targetVal < currentVal ? 2 : 1}}></div>
                                 </div>
 
                                 {/* Target Side */}
                                 <div className="flex items-center justify-start w-16 gap-1">
-                                    <div className={`text-left font-mono font-bold ${statDiff > 0 ? 'text-white' : 'text-slate-400'}`}>{targetVal}</div>
-                                    {/* Show +diff only if target is better (statDiff > 0) */}
-                                    {statDiff > 0 && <span className="text-emerald-400 font-bold text-[10px]">+{statDiff}</span>}
+                                    <div className={`text-left font-mono font-bold ${statDiff > 0 ? (isDarkMode ? 'text-white' : 'text-gray-900') : (isDarkMode ? 'text-slate-400' : 'text-gray-400')}`}>{targetVal}</div>
+                                    {statDiff > 0 && <span className="text-emerald-500 font-bold text-[10px]">+{statDiff}</span>}
                                 </div>
                             </div>
                         </div>
@@ -435,22 +716,67 @@ export default function App() {
     const [savedPlayers, setSavedPlayers] = useState([]);
     const [activePlayerId, setActivePlayerId] = useState(null);
     const [modalConfig, setModalConfig] = useState({ isOpen: false, type: 'alert', title: '', message: '', onConfirm: null, content: null });
+    const [toasts, setToasts] = useState([]); 
+    const [isDarkMode, setIsDarkMode] = useState(true); // New State: Theme
+    const prevCalculatedValue = useRef(0); 
 
     useEffect(() => {
         const saved = localStorage.getItem('fifa_saved_players');
         if (saved) { try { setSavedPlayers(JSON.parse(saved)); } catch (e) { console.error(e); } }
+        
+        // Load theme pref
+        const savedTheme = localStorage.getItem('fifa_theme');
+        if (savedTheme) {
+            setIsDarkMode(savedTheme === 'dark');
+        }
     }, []);
+
+    // Helper to add toast
+    const addToast = (message, type = 'success') => {
+        const id = Date.now();
+        setToasts(prev => [...prev, { id, message, type }]);
+        setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 3000);
+    };
+
+    const removeToast = (id) => setToasts(prev => prev.filter(t => t.id !== id));
+
+    // Toggle Theme Function
+    const toggleTheme = () => {
+        const newMode = !isDarkMode;
+        setIsDarkMode(newMode);
+        localStorage.setItem('fifa_theme', newMode ? 'dark' : 'light');
+    };
 
     const handlePositionChange = (pos) => {
         if (pos === selectedPosition) return;
+
+        const newPosKeys = dataset.filter(p => p.position === pos).map(p => p.key);
+
+        const preservedInputs = Object.keys(inputs).reduce((acc, key) => {
+            if (newPosKeys.includes(key)) {
+                acc[key] = inputs[key];
+            }
+            return acc;
+        }, {});
+
+        const preservedTcState = Object.keys(tcState).reduce((acc, key) => {
+            if (newPosKeys.includes(key)) {
+                acc[key] = tcState[key];
+            }
+            return acc;
+        }, {});
+
         setSelectedPosition(pos);
-        setInputs({});
-        setTcState({});
-        setCalculatedValue(0);
+        setInputs(preservedInputs); 
+        setTcState(preservedTcState); 
+        setCalculatedValue(0); 
         setSortOrder('default');
         setActiveStrategyId('max_rating');
-        setPlayerName('');
         setActivePlayerId(null);
+        
+        if (Object.keys(preservedInputs).length > 0) {
+            // Optional: notify
+        }
     };
 
     // Feature 1: Reset Button Logic
@@ -461,13 +787,16 @@ export default function App() {
                 setInputs({});
                 setTcState({});
                 closeModal();
+                addToast('ล้างค่าพลังเรียบร้อยแล้ว');
             },
             onCancel: closeModal
         });
     };
 
     const handleInputChange = (e) => {
-        setInputs({ ...inputs, [e.target.name]: Math.max(0, Number(e.target.value)) });
+        let val = Number(e.target.value);
+        // if (val > 99) val = 99; // Removed max cap logic
+        setInputs({ ...inputs, [e.target.name]: Math.max(0, val) });
     };
 
     const handleTCToggle = (key) => {
@@ -486,7 +815,10 @@ export default function App() {
                 const tcBonus = tcState[player.key] ? 2 : 0; 
                 total += (mainValue + tcBonus) * player.value;
             });
-            setCalculatedValue(total / 100);
+            const newValue = total / 100;
+            
+            prevCalculatedValue.current = newValue;
+            setCalculatedValue(newValue);
         };
         calculateStatus();
     }, [inputs, tcState, selectedPosition]);
@@ -506,14 +838,14 @@ export default function App() {
             const updatedList = savedPlayers.map(p => p.id === activePlayerId ? { ...p, ...playerData } : p);
             setSavedPlayers(updatedList);
             localStorage.setItem('fifa_saved_players', JSON.stringify(updatedList));
-            showModal({ type: 'alert', title: 'สำเร็จ', message: 'บันทึกทับข้อมูลเดิมเรียบร้อยแล้ว', onConfirm: closeModal });
+            addToast('บันทึกทับข้อมูลเดิมเรียบร้อยแล้ว');
         } else {
             const newId = Date.now();
             const updatedList = [{ id: newId, ...playerData }, ...savedPlayers];
             setSavedPlayers(updatedList);
             localStorage.setItem('fifa_saved_players', JSON.stringify(updatedList));
             setActivePlayerId(newId);
-            showModal({ type: 'alert', title: 'สำเร็จ', message: 'บันทึกนักเตะใหม่เรียบร้อยแล้ว', onConfirm: closeModal });
+            addToast('บันทึกนักเตะใหม่เรียบร้อยแล้ว');
         }
     };
 
@@ -527,7 +859,7 @@ export default function App() {
         setSavedPlayers(updatedList);
         localStorage.setItem('fifa_saved_players', JSON.stringify(updatedList));
         setActivePlayerId(newId);
-        showModal({ type: 'alert', title: 'สำเร็จ', message: 'บันทึกเป็นไฟล์ใหม่เรียบร้อยแล้ว', onConfirm: closeModal });
+        addToast('บันทึกเป็นไฟล์ใหม่เรียบร้อยแล้ว');
     };
 
     const handleLoadPlayer = (player) => {
@@ -538,6 +870,7 @@ export default function App() {
             setPlayerName(player.name);
             setActivePlayerId(player.id);
             closeModal();
+            addToast(`โหลดข้อมูล "${player.name}" เรียบร้อยแล้ว`);
         };
         if (Object.keys(inputs).length > 0 && activePlayerId !== player.id) {
             showModal({ type: 'confirm', title: 'ยืนยันการโหลด', message: `ต้องการโหลดข้อมูลของ "${player.name}" หรือไม่? ข้อมูลปัจจุบันที่ยังไม่บันทึกจะหายไป`, onConfirm: load, onCancel: closeModal });
@@ -555,12 +888,12 @@ export default function App() {
                 localStorage.setItem('fifa_saved_players', JSON.stringify(updatedList));
                 if (activePlayerId === id) { setActivePlayerId(null); setPlayerName(''); setInputs({}); setTcState({}); }
                 closeModal();
+                addToast('ลบข้อมูลเรียบร้อยแล้ว');
             },
             onCancel: closeModal
         });
     };
 
-    // Feature 4: Compare Mode Logic
     const handleCompare = (targetPlayer) => {
         const currentPlayer = {
             name: playerName || "Current Draft",
@@ -573,9 +906,9 @@ export default function App() {
         showModal({
             type: 'compare',
             title: 'เปรียบเทียบนักเตะ',
-            content: <CompareModalContent current={currentPlayer} target={targetPlayer} dataset={dataset} />,
+            content: <CompareModalContent current={currentPlayer} target={targetPlayer} dataset={dataset} isDarkMode={isDarkMode} />,
             onCancel: closeModal,
-            onConfirm: closeModal // Just to have a close button
+            onConfirm: closeModal
         });
     };
 
@@ -606,59 +939,107 @@ export default function App() {
     }).filter(s => s.isValid);
     const applyActiveStrategy = () => {
         const active = strategies.find(s => s.id === activeStrategyId);
-        if (active) { const newTcState = {}; active.candidates.forEach(p => { newTcState[p.key] = true; }); setTcState(newTcState); }
+        if (active) { 
+            const newTcState = {}; 
+            active.candidates.forEach(p => { newTcState[p.key] = true; }); 
+            setTcState(newTcState); 
+            addToast(`ใช้สูตร ${active.name} เรียบร้อยแล้ว`);
+        }
     };
     const tcCount = Object.values(tcState).filter(Boolean).length;
 
-    return (
-        <div className="min-h-screen bg-slate-950 text-slate-200 font-sans selection:bg-indigo-500 selection:text-white">
-            <style>{`@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800&display=swap'); body, .font-kanit { font-family: 'Kanit', sans-serif; } @keyframes shine { 0% { left: -100%; opacity: 0; } 50% { opacity: 0.5; } 100% { left: 200%; opacity: 0; } } .animate-shine { animation: shine 2s infinite linear; } .custom-scrollbar::-webkit-scrollbar { width: 6px; } .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 4px; } .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; } .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }`}</style>
-            
-            <Modal isOpen={modalConfig.isOpen} type={modalConfig.type} title={modalConfig.title} message={modalConfig.message} onConfirm={modalConfig.onConfirm} onCancel={modalConfig.onCancel} content={modalConfig.content} />
+    // Calculate radar stats for current player
+    const radarStats = calculateGroupStats(inputs, tcState, selectedPosition);
+    // Get Archetype
+    const archetype = getArchetype(inputs, tcState);
 
-            <header className="sticky top-0 z-20 backdrop-blur-xl bg-slate-900/80 border-b border-slate-800">
+    return (
+        <div className={`min-h-screen font-sans selection:bg-indigo-500 selection:text-white transition-colors duration-300 ${isDarkMode ? 'bg-slate-950 text-slate-200' : 'bg-gray-100 text-gray-900'}`} style={isDarkMode ? {
+            backgroundImage: `radial-gradient(circle at 50% 50%, rgba(30, 41, 59, 0.5) 0%, rgba(2, 6, 23, 1) 100%), url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23334155' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+        } : {
+            backgroundImage: `radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.8) 0%, rgba(241, 245, 249, 1) 100%), url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23cbd5e1' fill-opacity='0.2'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+        }}>
+            <style>{`@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800&display=swap'); body, .font-kanit { font-family: 'Kanit', sans-serif; } @keyframes shine { 0% { left: -100%; opacity: 0; } 50% { opacity: 0.5; } 100% { left: 200%; opacity: 0; } } .animate-shine { animation: shine 2s infinite linear; } .custom-scrollbar::-webkit-scrollbar { width: 6px; } .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); border-radius: 4px; } .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(100,116,139,0.2); border-radius: 4px; } .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(100,116,139,0.4); }`}</style>
+            
+            <Modal isOpen={modalConfig.isOpen} type={modalConfig.type} title={modalConfig.title} message={modalConfig.message} onConfirm={modalConfig.onConfirm} onCancel={modalConfig.onCancel} content={modalConfig.content} isDarkMode={isDarkMode} />
+            <ToastContainer toasts={toasts} removeToast={removeToast} isDarkMode={isDarkMode} />
+
+            <header className={`sticky top-0 z-20 backdrop-blur-xl border-b transition-colors ${isDarkMode ? 'bg-slate-900/80 border-slate-800' : 'bg-white/80 border-gray-200'}`}>
                 <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
-                    <div className="flex items-center gap-4"><div className="bg-indigo-600 p-2.5 rounded-xl shadow-lg shadow-indigo-600/20"><Calculator size={24} className="text-white" /></div><div><h1 className="text-xl font-bold tracking-tight text-white font-kanit">ระบบคำนวนอัพสเตตัสนักเตะ</h1><p className="text-xs text-slate-400 font-kanit">Dev by Jiw Jirakiat</p></div></div>
-                    <button onClick={() => window.location.reload()} className="p-2.5 bg-slate-800 hover:bg-slate-700 rounded-full transition-colors text-slate-400 hover:text-white border border-slate-700"><RefreshCw size={20} /></button>
+                    <div className="flex items-center gap-4">
+                        <div className="bg-indigo-600 p-2.5 rounded-xl shadow-lg shadow-indigo-600/20"><Calculator size={24} className="text-white" /></div>
+                        <div>
+                            <h1 className={`text-xl font-bold tracking-tight font-kanit ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>ระบบคำนวนอัพสเตตัสนักเตะ</h1>
+                            <p className={`text-xs font-kanit ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>Dev by Jiw Jirakiat</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <button onClick={toggleTheme} className={`p-2.5 rounded-full transition-colors border ${isDarkMode ? 'bg-slate-800 hover:bg-slate-700 text-yellow-400 border-slate-700' : 'bg-white hover:bg-gray-100 text-slate-600 border-gray-200'}`}>
+                            {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+                        </button>
+                        <button onClick={() => window.location.reload()} className={`p-2.5 rounded-full transition-colors border ${isDarkMode ? 'bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white border-slate-700' : 'bg-white hover:bg-gray-100 text-gray-500 hover:text-gray-800 border-gray-200'}`}><RefreshCw size={20} /></button>
+                    </div>
                 </div>
             </header>
 
             <main className="max-w-7xl mx-auto px-4 md:px-6 py-8">
                 <div className="grid md:grid-cols-12 gap-8">
                     <div className="md:col-span-3">
-                        <div className="bg-slate-800/30 p-5 rounded-3xl border border-white/5 backdrop-blur-md sticky top-24 shadow-xl">
-                            <h2 className="text-sm font-bold text-slate-200 mb-5 flex items-center gap-2.5 font-kanit"><div className="p-1.5 bg-emerald-500/20 rounded-lg text-emerald-400"><Target size={18} /></div>เลือกตำแหน่ง</h2>
-                            <PositionSelector selectedPosition={selectedPosition} onSelectPosition={handlePositionChange} />
+                        <div className={`p-5 rounded-3xl border backdrop-blur-md sticky top-24 shadow-xl transition-colors ${isDarkMode ? 'bg-slate-800/30 border-white/5' : 'bg-white/60 border-white shadow-indigo-100/50'}`}>
+                            <h2 className={`text-sm font-bold mb-5 flex items-center gap-2.5 font-kanit ${isDarkMode ? 'text-slate-200' : 'text-gray-800'}`}>
+                                <div className={`p-1.5 rounded-lg ${isDarkMode ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-100 text-emerald-600'}`}><Target size={18} /></div>
+                                เลือกตำแหน่ง
+                            </h2>
+                            <PositionSelector selectedPosition={selectedPosition} onSelectPosition={handlePositionChange} isDarkMode={isDarkMode} />
                         </div>
                     </div>
 
                     <div className="md:col-span-6">
-                        <div className="bg-slate-800/30 p-6 rounded-3xl border border-white/5 backdrop-blur-md shadow-xl min-h-[600px]">
-                            <div className="mb-6 p-4 rounded-2xl bg-slate-900/50 border border-white/5 flex items-center gap-3">
-                                <div className="p-2 bg-indigo-500/20 rounded-lg text-indigo-400"><PenLine size={20} /></div>
-                                <div className="flex-1 relative"><input type="text" value={playerName} onChange={(e) => setPlayerName(e.target.value)} placeholder="ใส่ชื่อนักเตะเพื่อบันทึก..." className="w-full bg-transparent border-none text-white placeholder-slate-500 focus:ring-0 font-kanit text-sm" /></div>
+                        <div className={`p-6 rounded-3xl border backdrop-blur-md shadow-xl min-h-[600px] transition-colors ${isDarkMode ? 'bg-slate-800/30 border-white/5' : 'bg-white/60 border-white shadow-indigo-100/50'}`}>
+                            <div className={`mb-6 p-4 rounded-2xl border flex items-center gap-3 transition-colors ${isDarkMode ? 'bg-slate-900/50 border-white/5' : 'bg-white border-gray-200 shadow-sm'}`}>
+                                <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-indigo-500/20 text-indigo-400' : 'bg-indigo-100 text-indigo-600'}`}><PenLine size={20} /></div>
+                                <div className="flex-1 relative">
+                                    <input 
+                                        type="text" 
+                                        value={playerName} 
+                                        onChange={(e) => setPlayerName(e.target.value)} 
+                                        placeholder="ใส่ชื่อนักเตะเพื่อบันทึก..." 
+                                        className={`w-full bg-transparent border-none focus:ring-0 font-kanit text-sm ${isDarkMode ? 'text-white placeholder-slate-500' : 'text-gray-900 placeholder-gray-400'}`} 
+                                    />
+                                </div>
                                 {activePlayerId && (
-                                    <button onClick={handleSaveAsNew} className="p-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors shadow-lg" title="บันทึกเป็นใหม่"><FilePlus size={18} /></button>
+                                    <button onClick={handleSaveAsNew} className={`p-2 rounded-lg transition-colors shadow-lg ${isDarkMode ? 'bg-slate-700 hover:bg-slate-600 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`} title="บันทึกเป็นใหม่"><FilePlus size={18} /></button>
                                 )}
                                 <button onClick={handleSavePlayer} className="p-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition-colors shadow-lg shadow-indigo-600/20" title={activePlayerId ? "บันทึกทับ" : "บันทึก"}>{activePlayerId ? <Save size={18} /> : <Save size={18} />}</button>
                             </div>
 
-                            <div className="flex justify-between items-center mb-8 pb-4 border-b border-white/5">
+                            <div className={`flex justify-between items-center mb-8 pb-4 border-b ${isDarkMode ? 'border-white/5' : 'border-gray-200'}`}>
                                 <div>
-                                    <h2 className="text-2xl font-bold text-white flex items-center gap-3 font-kanit"><div className="p-2 rounded-xl" style={{ backgroundColor: `${positionColors[selectedPosition]}20` }}><Activity size={24} style={{ color: positionColors[selectedPosition] }} /></div>{selectedPosition} Stats</h2>
-                                    <div className="flex items-center gap-3 mt-2 ml-1"><span className="text-[10px] bg-black/30 px-3 py-1 rounded-full text-slate-400 font-kanit border border-white/5 flex items-center gap-2">TC Used: <div className="flex gap-0.5">{[...Array(5)].map((_, i) => (<div key={i} className={`w-1.5 h-1.5 rounded-full ${i < tcCount ? 'bg-indigo-500' : 'bg-slate-700'}`} />))}</div><span className="text-indigo-400">{tcCount}/5</span></span></div>
+                                    <h2 className={`text-2xl font-bold flex items-center gap-3 font-kanit ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                                        <div className="p-2 rounded-xl" style={{ backgroundColor: `${positionColors[selectedPosition]}20` }}><Activity size={24} style={{ color: positionColors[selectedPosition] }} /></div>
+                                        {selectedPosition} Stats
+                                    </h2>
+                                    <div className="flex items-center gap-3 mt-2 ml-1">
+                                        <span className={`text-[10px] px-3 py-1 rounded-full font-kanit border flex items-center gap-2 ${isDarkMode ? 'bg-black/30 text-slate-400 border-white/5' : 'bg-gray-100 text-gray-500 border-gray-200'}`}>
+                                            TC Used: 
+                                            <div className="flex gap-0.5">{[...Array(5)].map((_, i) => (<div key={i} className={`w-1.5 h-1.5 rounded-full ${i < tcCount ? 'bg-indigo-500' : (isDarkMode ? 'bg-slate-700' : 'bg-gray-300')}`} />))}</div>
+                                            <span className="text-indigo-500">{tcCount}/5</span>
+                                        </span>
+                                    </div>
                                 </div>
-                                <button onClick={toggleSortOrder} className="flex items-center gap-2 px-4 py-2 bg-slate-800/50 hover:bg-slate-800 text-xs rounded-xl transition-colors border border-slate-700 text-slate-300 font-kanit"><ArrowUpDown size={14} />{sortOrder === 'default' ? 'เรียงตามเกม' : 'เรียงตามความสำคัญ'}</button>
+                                <button onClick={toggleSortOrder} className={`flex items-center gap-2 px-4 py-2 text-xs rounded-xl transition-colors border font-kanit ${isDarkMode ? 'bg-slate-800/50 hover:bg-slate-800 border-slate-700 text-slate-300' : 'bg-white hover:bg-gray-50 border-gray-200 text-gray-600 shadow-sm'}`}>
+                                    <ArrowUpDown size={14} />{sortOrder === 'default' ? 'เรียงตามเกม' : 'เรียงตามความสำคัญ'}
+                                </button>
                             </div>
                             
-                            <InputForm players={displayedPlayers} inputs={inputs} tcState={tcState} tcCount={tcCount} onInputChange={handleInputChange} onTCToggle={handleTCToggle} onReset={handleReset} />
+                            <InputForm players={displayedPlayers} inputs={inputs} tcState={tcState} tcCount={tcCount} onInputChange={handleInputChange} onTCToggle={handleTCToggle} onReset={handleReset} isDarkMode={isDarkMode} />
                         </div>
                     </div>
 
                     <div className="md:col-span-3 space-y-6">
                         <div className="sticky top-24 space-y-6">
-                            <ResultDisplay calculatedValue={calculatedValue} position={selectedPosition} topFactors={topFactors} strategies={strategies} activeStrategyId={activeStrategyId} onSelectStrategy={setActiveStrategyId} onApplyStrategy={applyActiveStrategy} playerName={playerName} />
-                            <SavedPlayersList savedPlayers={savedPlayers} onLoad={handleLoadPlayer} onDelete={handleDeletePlayer} onCompare={handleCompare} activePlayerId={activePlayerId} />
+                            <ResultDisplay calculatedValue={calculatedValue} position={selectedPosition} topFactors={topFactors} strategies={strategies} activeStrategyId={activeStrategyId} onSelectStrategy={setActiveStrategyId} onApplyStrategy={applyActiveStrategy} playerName={playerName} archetype={archetype} radarStats={radarStats} isDarkMode={isDarkMode} />
+                            <SavedPlayersList savedPlayers={savedPlayers} onLoad={handleLoadPlayer} onDelete={handleDeletePlayer} onCompare={handleCompare} activePlayerId={activePlayerId} isDarkMode={isDarkMode} />
                         </div>
                     </div>
                 </div>
