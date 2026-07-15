@@ -349,15 +349,15 @@ const PositionSelector = ({ selectedPosition, onSelectPosition, isDarkMode }) =>
 
     return (
         <div>
-            {/* Mobile quick-select: horizontal scroll chips, saves vertical space on small screens */}
-            <div className="flex md:hidden gap-2 overflow-x-auto pb-1 -mx-1 px-1 custom-scrollbar">
+            {/* Mobile/tablet quick-select: horizontal scroll chips, saves vertical space on smaller screens */}
+            <div className="flex lg:hidden gap-2 overflow-x-auto pb-1 -mx-1 px-1 custom-scrollbar">
                 {ALL_POSITIONS.map((pos) => {
                     const isSelected = selectedPosition === pos;
                     return (
                         <button
                             key={pos}
                             onClick={() => onSelectPosition(pos)}
-                            className={`flex-shrink-0 px-3.5 py-2 text-xs rounded-full border font-bold font-kanit transition-all whitespace-nowrap
+                            className={`flex-shrink-0 px-4 py-2.5 text-sm rounded-full border font-bold font-kanit transition-all whitespace-nowrap
                                 ${isSelected
                                     ? 'text-white border-transparent shadow-md shadow-black/20'
                                     : isDarkMode
@@ -372,7 +372,7 @@ const PositionSelector = ({ selectedPosition, onSelectPosition, isDarkMode }) =>
                 })}
             </div>
 
-            <div className="hidden md:block space-y-5">
+            <div className="hidden lg:block space-y-5">
             {positionGroups.map((group) => (
                 <div key={group.title}>
                     <h3 className={`text-xs font-medium mb-2.5 uppercase tracking-wider pl-1 font-kanit flex items-center gap-2 ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>
@@ -414,16 +414,16 @@ const PositionSelector = ({ selectedPosition, onSelectPosition, isDarkMode }) =>
 const InputForm = ({ players, inputs, tcState, onInputChange, onTCToggle, tcCount, onReset, onStep, searchValue, onSearchChange, isDarkMode }) => {
     return (
         <div>
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-4">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-5">
                 <div className="relative flex-1">
-                    <Search size={15} className={`absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none ${isDarkMode ? 'text-slate-500' : 'text-gray-400'}`} />
+                    <Search size={16} className={`absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none ${isDarkMode ? 'text-slate-500' : 'text-gray-400'}`} />
                     <input
                         type="text"
                         value={searchValue}
                         onChange={onSearchChange}
                         placeholder="ค้นหาค่าพลัง เช่น ความเร็ว..."
                         aria-label="ค้นหาค่าพลัง"
-                        className={`w-full pl-9 pr-3 py-2 rounded-lg text-sm font-kanit outline-none border transition-all focus:ring-2
+                        className={`w-full pl-9 pr-3 py-2.5 rounded-lg text-sm font-kanit outline-none border transition-all focus:ring-2
                             ${isDarkMode
                                 ? 'bg-slate-900/60 border-slate-700/70 text-white placeholder-slate-500 focus:ring-indigo-500/40 focus:border-indigo-500/50'
                                 : 'bg-white border-gray-200 text-gray-800 placeholder-gray-400 focus:ring-indigo-200 focus:border-indigo-400'
@@ -432,13 +432,13 @@ const InputForm = ({ players, inputs, tcState, onInputChange, onTCToggle, tcCoun
                 </div>
                 <button 
                     onClick={onReset}
-                    className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-kanit transition-all border whitespace-nowrap
+                    className={`flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-lg text-sm font-kanit transition-all border whitespace-nowrap
                         ${isDarkMode 
                             ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20 border-red-500/20' 
                             : 'bg-red-50 text-red-600 hover:bg-red-100 border-red-100'
                         }`}
                 >
-                    <Eraser size={14} /> ล้างค่าพลัง
+                    <Eraser size={15} /> ล้างค่าพลัง
                 </button>
             </div>
             {players.length === 0 ? (
@@ -446,13 +446,13 @@ const InputForm = ({ players, inputs, tcState, onInputChange, onTCToggle, tcCoun
                     ไม่พบค่าพลังที่ตรงกับคำค้นหา "{searchValue}"
                 </div>
             ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                 {players.map((player) => {
                     const isTCActive = tcState[player.key];
                     const canActivate = tcCount < 5 || isTCActive;
                     const StatIcon = STAT_ICONS[player.key] || Activity; 
                     return (
-                        <div key={player.key} className={`relative p-3 rounded-xl border transition-all duration-300 flex flex-col justify-between gap-2.5 group 
+                        <div key={player.key} className={`relative p-4 rounded-xl border transition-all duration-300 flex flex-col justify-between gap-3 group 
                             ${isTCActive 
                                 ? (isDarkMode ? 'bg-indigo-500/10 border-indigo-500/40' : 'bg-indigo-50 border-indigo-200') 
                                 : (isDarkMode 
@@ -460,7 +460,7 @@ const InputForm = ({ players, inputs, tcState, onInputChange, onTCToggle, tcCoun
                                     : 'bg-white border-gray-200 hover:border-indigo-200 hover:shadow-sm')
                             }`}>
                             <div className="flex justify-between items-start">
-                                <label className={`text-sm font-medium font-kanit flex items-center gap-2.5 transition-colors 
+                                <label className={`text-base font-medium font-kanit flex items-center gap-2.5 transition-colors 
                                     ${isTCActive 
                                         ? (isDarkMode ? 'text-indigo-300' : 'text-indigo-700') 
                                         : (isDarkMode ? 'text-slate-300 group-hover:text-slate-200' : 'text-gray-600 group-hover:text-gray-900')
@@ -470,11 +470,11 @@ const InputForm = ({ players, inputs, tcState, onInputChange, onTCToggle, tcCoun
                                             ? (isDarkMode ? 'bg-indigo-500/20 text-indigo-400' : 'bg-indigo-100 text-indigo-600') 
                                             : (isDarkMode ? 'bg-slate-700/50 text-slate-500 group-hover:bg-slate-700 group-hover:text-slate-400' : 'bg-gray-100 text-gray-400 group-hover:bg-gray-200 group-hover:text-gray-600')
                                         }`}>
-                                        <StatIcon size={14} />
+                                        <StatIcon size={15} />
                                     </div>
                                     {player.key}
                                 </label>
-                                <span className={`text-[10px] font-kanit px-2 py-0.5 rounded-full border 
+                                <span className={`text-xs font-kanit font-semibold px-2 py-0.5 rounded-full border 
                                     ${isTCActive 
                                         ? (isDarkMode ? 'bg-indigo-500/20 border-indigo-500/20 text-indigo-300' : 'bg-indigo-100 border-indigo-200 text-indigo-700') 
                                         : (isDarkMode ? 'bg-slate-900/50 border-slate-700 text-slate-500' : 'bg-gray-50 border-gray-200 text-gray-400')
@@ -482,16 +482,16 @@ const InputForm = ({ players, inputs, tcState, onInputChange, onTCToggle, tcCoun
                                     {player.value}%
                                 </span>
                             </div>
-                            <div className="flex items-center gap-1.5 mt-0.5">
+                            <div className="flex items-center gap-2 mt-0.5">
                                 <button
                                     type="button"
                                     tabIndex={-1}
                                     onClick={() => onStep(player.key, -1)}
                                     aria-label={`ลดค่าพลัง ${player.key}`}
-                                    className={`flex-shrink-0 w-7 h-[34px] rounded-lg flex items-center justify-center transition-colors border
+                                    className={`flex-shrink-0 w-8 h-9 rounded-lg flex items-center justify-center transition-colors border
                                         ${isDarkMode ? 'bg-slate-800/60 border-slate-700/80 text-slate-400 hover:bg-slate-700 hover:text-white' : 'bg-white border-gray-200 text-gray-400 hover:bg-gray-50 hover:text-gray-700'}`}
                                 >
-                                    <Minus size={13} />
+                                    <Minus size={15} />
                                 </button>
                                 <div className="relative flex-1">
                                     <input 
@@ -502,7 +502,7 @@ const InputForm = ({ players, inputs, tcState, onInputChange, onTCToggle, tcCoun
                                         value={inputs[player.key] || ''} 
                                         onChange={onInputChange} 
                                         aria-label={`ค่าพลัง ${player.key}`}
-                                        className={`w-full border text-center rounded-lg py-1.5 outline-none font-mono text-sm transition-all shadow-inner focus:ring-2 
+                                        className={`w-full border text-center rounded-lg py-2 outline-none font-mono text-base transition-all shadow-inner focus:ring-2 
                                             ${isDarkMode 
                                                 ? 'bg-slate-900/80 text-white focus:ring-indigo-500/50 focus:border-indigo-500/50 border-slate-700/80 group-hover:border-slate-600' 
                                                 : 'bg-gray-50 text-gray-900 focus:ring-indigo-200 focus:border-indigo-400 border-gray-200 group-hover:border-gray-300'
@@ -522,10 +522,10 @@ const InputForm = ({ players, inputs, tcState, onInputChange, onTCToggle, tcCoun
                                     tabIndex={-1}
                                     onClick={() => onStep(player.key, 1)}
                                     aria-label={`เพิ่มค่าพลัง ${player.key}`}
-                                    className={`flex-shrink-0 w-7 h-[34px] rounded-lg flex items-center justify-center transition-colors border
+                                    className={`flex-shrink-0 w-8 h-9 rounded-lg flex items-center justify-center transition-colors border
                                         ${isDarkMode ? 'bg-slate-800/60 border-slate-700/80 text-slate-400 hover:bg-slate-700 hover:text-white' : 'bg-white border-gray-200 text-gray-400 hover:bg-gray-50 hover:text-gray-700'}`}
                                 >
-                                    <Plus size={13} />
+                                    <Plus size={15} />
                                 </button>
                                 <button 
                                     type="button" 
@@ -533,7 +533,7 @@ const InputForm = ({ players, inputs, tcState, onInputChange, onTCToggle, tcCoun
                                     onClick={() => canActivate && onTCToggle(player.key)} 
                                     disabled={!canActivate} 
                                     aria-label={`${isTCActive ? 'ยกเลิก' : 'เพิ่ม'} TC สำหรับ ${player.key}`}
-                                    className={`relative w-12 h-[34px] rounded-lg flex items-center justify-center transition-all duration-300 outline-none focus:ring-0 border
+                                    className={`relative w-14 h-9 rounded-lg flex items-center justify-center transition-all duration-300 outline-none focus:ring-0 border
                                         ${isTCActive 
                                             ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 scale-105 border-transparent' 
                                             : canActivate 
@@ -541,7 +541,7 @@ const InputForm = ({ players, inputs, tcState, onInputChange, onTCToggle, tcCoun
                                                 : (isDarkMode ? 'bg-slate-800/50 text-slate-700 cursor-not-allowed border-transparent' : 'bg-gray-100 text-gray-300 cursor-not-allowed border-transparent')
                                         }`}
                                 >
-                                    <span className="font-mono text-xs font-bold">{isTCActive ? '+2' : 'TC'}</span>
+                                    <span className="font-mono text-sm font-bold">{isTCActive ? '+2' : 'TC'}</span>
                                 </button>
                             </div>
                         </div>
@@ -569,8 +569,8 @@ const ResultDisplay = ({ calculatedValue, position, topFactors, strategies, acti
                     <div className={`p-4 rounded-full ${isDarkMode ? 'bg-indigo-500/10 text-indigo-400' : 'bg-indigo-100 text-indigo-600'}`}>
                         <Target size={26} />
                     </div>
-                    <h3 className={`text-sm font-bold font-kanit ${isDarkMode ? 'text-slate-200' : 'text-gray-800'}`}>เริ่มกรอกค่าพลังนักเตะ</h3>
-                    <p className={`text-xs font-kanit leading-relaxed max-w-[220px] ${isDarkMode ? 'text-slate-500' : 'text-gray-500'}`}>กรอกค่าพลังทางด้านซ้ายเพื่อดู Rating การ์ดนักเตะและคำแนะนำการอัพ TC ที่นี่</p>
+                    <h3 className={`text-base font-bold font-kanit ${isDarkMode ? 'text-slate-200' : 'text-gray-800'}`}>เริ่มกรอกค่าพลังนักเตะ</h3>
+                    <p className={`text-sm font-kanit leading-relaxed max-w-[240px] ${isDarkMode ? 'text-slate-500' : 'text-gray-500'}`}>กรอกค่าพลังทางด้านซ้ายเพื่อดู Rating การ์ดนักเตะและคำแนะนำการอัพ TC ที่นี่</p>
                 </div>
             ) : (
             <div className={`flex flex-col items-center justify-center p-6 rounded-3xl border backdrop-blur-md relative overflow-hidden group transition-colors
@@ -580,13 +580,13 @@ const ResultDisplay = ({ calculatedValue, position, topFactors, strategies, acti
                 </div>
                 
                 <div className="mt-6 text-center z-10 w-full px-6">
-                    <h3 className={`text-3xl font-bold mb-1 tracking-tight ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>{calculatedValue.toFixed(2)}</h3>
+                    <h3 className={`text-4xl font-bold mb-1 tracking-tight ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>{calculatedValue.toFixed(2)}</h3>
                     
                     {/* Decimal Progress Bar */}
                     <div className={`w-full h-1.5 rounded-full mt-2 mb-1 overflow-hidden ${isDarkMode ? 'bg-slate-700' : 'bg-gray-200'}`}>
                         <div className="h-full bg-emerald-500 transition-all duration-500" style={{ width: `${progressPercent}%` }}></div>
                     </div>
-                    <div className={`flex justify-between text-[10px] font-kanit ${isDarkMode ? 'text-slate-500' : 'text-gray-500'}`}>
+                    <div className={`flex justify-between text-xs font-kanit ${isDarkMode ? 'text-slate-500' : 'text-gray-500'}`}>
                         <span>{Math.floor(calculatedValue)}</span>
                         <span className="text-emerald-500">{progressPercent.toFixed(0)}% to next</span>
                         <span>{Math.floor(calculatedValue) + 1}</span>
@@ -598,7 +598,7 @@ const ResultDisplay = ({ calculatedValue, position, topFactors, strategies, acti
             <div className={`rounded-2xl p-5 backdrop-blur-md border transition-colors ${isDarkMode ? 'bg-slate-800/30 border-white/5' : 'bg-white/60 border-white shadow-lg shadow-indigo-50/50'}`}>
                 <div className="flex items-center gap-2.5 mb-4">
                     <div className={`p-1.5 rounded-lg ${isDarkMode ? 'bg-sky-500/20 text-sky-400' : 'bg-sky-100 text-sky-600'}`}><Hexagon size={18} /></div>
-                    <h3 className={`text-sm font-bold font-kanit ${isDarkMode ? 'text-slate-200' : 'text-gray-800'}`}>วิเคราะห์ทรงบอล (Style)</h3>
+                    <h3 className={`text-base font-bold font-kanit ${isDarkMode ? 'text-slate-200' : 'text-gray-800'}`}>วิเคราะห์ทรงบอล (Style)</h3>
                 </div>
                 <div className="flex justify-center pb-2">
                     <RadarChart stats={radarStats} size={200} color="#0ea5e9" isDarkMode={isDarkMode} />
@@ -608,19 +608,19 @@ const ResultDisplay = ({ calculatedValue, position, topFactors, strategies, acti
             <div className={`rounded-2xl p-5 backdrop-blur-md border transition-colors ${isDarkMode ? 'bg-slate-800/30 border-white/5' : 'bg-white/60 border-white shadow-lg shadow-indigo-50/50'}`}>
                 <div className="flex items-center gap-2.5 mb-4">
                     <div className={`p-1.5 rounded-lg ${isDarkMode ? 'bg-indigo-500/20 text-indigo-400' : 'bg-indigo-100 text-indigo-600'}`}><Flame size={18} /></div>
-                    <h3 className={`text-sm font-bold font-kanit ${isDarkMode ? 'text-slate-200' : 'text-gray-800'}`}>แนะนำสูตรอัพพลัง TC</h3>
+                    <h3 className={`text-base font-bold font-kanit ${isDarkMode ? 'text-slate-200' : 'text-gray-800'}`}>แนะนำสูตรอัพพลัง TC</h3>
                 </div>
                 <div className="flex flex-wrap gap-2 mb-4">
                     {strategies.map(s => {
                         const Icon = s.icon;
                         const isActive = s.id === activeStrategyId;
                         return (
-                            <button key={s.id} onClick={() => onSelectStrategy(s.id)} className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-[10px] font-kanit transition-all border 
+                            <button key={s.id} onClick={() => onSelectStrategy(s.id)} className={`flex items-center gap-1.5 px-3.5 py-2.5 rounded-lg text-sm font-kanit transition-all border 
                                 ${isActive 
                                     ? 'bg-indigo-600 text-white border-indigo-500 font-medium shadow-lg shadow-indigo-500/20' 
                                     : (isDarkMode ? 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700 hover:text-slate-200' : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50 hover:text-gray-800 hover:border-gray-300')
                                 }`}>
-                                <Icon size={12} /> {s.name}
+                                <Icon size={14} /> {s.name}
                             </button>
                         );
                     })}
@@ -628,38 +628,38 @@ const ResultDisplay = ({ calculatedValue, position, topFactors, strategies, acti
                 <div className={`rounded-xl p-4 border relative overflow-hidden ${isDarkMode ? 'bg-slate-900/50 border-white/5' : 'bg-white border-gray-100'}`}>
                     <div className="flex justify-between items-start mb-3 relative z-10">
                         <div>
-                            <h4 className={`text-sm font-bold font-kanit flex items-center gap-2 ${isDarkMode ? 'text-indigo-400' : 'text-indigo-700'}`}>
+                            <h4 className={`text-base font-bold font-kanit flex items-center gap-2 ${isDarkMode ? 'text-indigo-400' : 'text-indigo-700'}`}>
                                 {activeStrategy.name}
-                                <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono border ${isDarkMode ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>+{bonusRating.toFixed(2)} OVR</span>
+                                <span className={`text-xs px-2 py-0.5 rounded-full font-mono border ${isDarkMode ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>+{bonusRating.toFixed(2)} OVR</span>
                             </h4>
-                            <p className={`text-[10px] mt-1 font-kanit leading-relaxed font-light ${isDarkMode ? 'text-slate-500' : 'text-gray-500'}`}>{activeStrategy.description}</p>
+                            <p className={`text-xs mt-1 font-kanit leading-relaxed font-light ${isDarkMode ? 'text-slate-500' : 'text-gray-500'}`}>{activeStrategy.description}</p>
                         </div>
                     </div>
                     <div className="space-y-2 mb-4 relative z-10">
                         {activeStrategy.candidates.map((p, i) => (
-                            <div key={i} className={`flex justify-between items-center text-[10px] p-1.5 rounded border ${isDarkMode ? 'bg-white/5 border-white/5' : 'bg-gray-50 border-gray-100'}`}>
+                            <div key={i} className={`flex justify-between items-center text-xs p-2 rounded border ${isDarkMode ? 'bg-white/5 border-white/5' : 'bg-gray-50 border-gray-100'}`}>
                                 <span className={`font-kanit flex items-center gap-2 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>
-                                    <span className={`w-4 h-4 flex items-center justify-center rounded-full text-[9px] font-bold ${isDarkMode ? 'bg-slate-700 text-slate-400' : 'bg-gray-200 text-gray-500'}`}>{i+1}</span>{p.key}
+                                    <span className={`w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold ${isDarkMode ? 'bg-slate-700 text-slate-400' : 'bg-gray-200 text-gray-500'}`}>{i+1}</span>{p.key}
                                 </span>
                                 <span className={`${isDarkMode ? 'text-slate-500' : 'text-gray-400'} font-kanit`}>สำคัญ {p.value}%</span>
                             </div>
                         ))}
                     </div>
-                    <button onClick={onApplyStrategy} className="w-full text-xs bg-indigo-600 text-white px-4 py-2.5 rounded-lg shadow-lg hover:shadow-indigo-500/20 hover:bg-indigo-500 transition-all flex items-center justify-center gap-2 font-kanit font-medium relative z-10"><CheckCircle2 size={14} /> ใช้สูตรนี้เลย</button>
+                    <button onClick={onApplyStrategy} className="w-full text-sm bg-indigo-600 text-white px-4 py-2.5 rounded-lg shadow-lg hover:shadow-indigo-500/20 hover:bg-indigo-500 transition-all flex items-center justify-center gap-2 font-kanit font-medium relative z-10"><CheckCircle2 size={15} /> ใช้สูตรนี้เลย</button>
                 </div>
             </div>
 
             <div className={`rounded-2xl p-5 backdrop-blur-md border transition-colors ${isDarkMode ? 'bg-slate-800/30 border-white/5' : 'bg-white/60 border-white shadow-lg shadow-indigo-50/50'}`}>
-                <h3 className={`text-sm font-bold mb-4 flex items-center gap-2.5 font-kanit ${isDarkMode ? 'text-slate-200' : 'text-gray-800'}`}>
+                <h3 className={`text-base font-bold mb-4 flex items-center gap-2.5 font-kanit ${isDarkMode ? 'text-slate-200' : 'text-gray-800'}`}>
                     <div className={`p-1.5 rounded-lg ${isDarkMode ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-100 text-emerald-600'}`}><Shield size={18} /></div>
                     5 อันดับความสำคัญสูงสุด
                 </h3>
                 <div className="space-y-2">
                     {topFactors.map((p, i) => (
-                        <div key={i} className={`flex justify-between items-center text-xs p-2.5 rounded-lg transition-colors border border-transparent 
+                        <div key={i} className={`flex justify-between items-center text-sm p-2.5 rounded-lg transition-colors border border-transparent 
                             ${isDarkMode ? 'bg-white/5 hover:bg-white/10 hover:border-white/5' : 'bg-white hover:bg-gray-50 hover:border-gray-200 shadow-sm'}`}>
                             <div className="flex items-center gap-3">
-                                <span className={`w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold ${i === 0 ? 'bg-amber-500 text-black' : (isDarkMode ? 'bg-slate-700 text-slate-400' : 'bg-gray-200 text-gray-500')}`}>{i+1}</span>
+                                <span className={`w-5 h-5 flex items-center justify-center rounded-full text-xs font-bold ${i === 0 ? 'bg-amber-500 text-black' : (isDarkMode ? 'bg-slate-700 text-slate-400' : 'bg-gray-200 text-gray-500')}`}>{i+1}</span>
                                 <span className={`font-kanit ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>{p.key}</span>
                             </div>
                             <span className={`font-mono font-bold ${isDarkMode ? 'text-indigo-400' : 'text-indigo-600'}`}>{p.value}%</span>
@@ -676,7 +676,7 @@ const SavedPlayersList = ({ savedPlayers, onLoad, onDelete, onCompare, activePla
 
     return (
         <div className={`rounded-2xl p-5 backdrop-blur-md border transition-colors ${isDarkMode ? 'bg-slate-800/30 border-white/5' : 'bg-white/60 border-white shadow-lg shadow-indigo-50/50'}`}>
-            <h3 className={`text-sm font-bold mb-4 flex items-center gap-2.5 font-kanit ${isDarkMode ? 'text-slate-200' : 'text-gray-800'}`}>
+            <h3 className={`text-base font-bold mb-4 flex items-center gap-2.5 font-kanit ${isDarkMode ? 'text-slate-200' : 'text-gray-800'}`}>
                 <div className={`p-1.5 rounded-lg ${isDarkMode ? 'bg-amber-500/20 text-amber-400' : 'bg-amber-100 text-amber-600'}`}><FolderOpen size={18} /></div>
                 นักเตะที่บันทึกไว้ ({savedPlayers.length})
             </h3>
@@ -690,7 +690,7 @@ const SavedPlayersList = ({ savedPlayers, onLoad, onDelete, onCompare, activePla
                         <div className="flex items-center gap-3.5 cursor-pointer flex-1" onClick={() => onLoad(player)}>
                             <div className="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold text-black shadow-lg ring-2 ring-white/10" style={{ background: `linear-gradient(135deg, ${positionColors[player.position]} 0%, #cbd5e1 100%)` }}>{player.position}</div>
                             <div>
-                                <h4 className={`text-sm font-bold font-kanit transition-colors flex items-center gap-2 
+                                <h4 className={`text-base font-bold font-kanit transition-colors flex items-center gap-2 
                                     ${activePlayerId === player.id 
                                         ? (isDarkMode ? 'text-indigo-300' : 'text-indigo-700') 
                                         : (isDarkMode ? 'text-slate-200 group-hover:text-white' : 'text-gray-700 group-hover:text-black')
@@ -699,8 +699,8 @@ const SavedPlayersList = ({ savedPlayers, onLoad, onDelete, onCompare, activePla
                                     {activePlayerId === player.id && <span className="text-[9px] bg-indigo-500 text-white px-1.5 py-0.5 rounded flex items-center gap-1 font-bold shadow-sm">แก้ไขอยู่</span>}
                                 </h4>
                                 <div className="flex items-center gap-2 mt-1">
-                                    <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded border ${isDarkMode ? 'text-slate-400 bg-black/40 border-white/5' : 'text-gray-500 bg-gray-100 border-gray-200'}`}>OVR {Math.floor(player.rating)}</span>
-                                    <span className={`text-[10px] font-light ${isDarkMode ? 'text-slate-600' : 'text-gray-400'}`}>{new Date(player.lastModified || player.id).toLocaleDateString()}</span>
+                                    <span className={`text-xs font-mono px-1.5 py-0.5 rounded border ${isDarkMode ? 'text-slate-400 bg-black/40 border-white/5' : 'text-gray-500 bg-gray-100 border-gray-200'}`}>OVR {Math.floor(player.rating)}</span>
+                                    <span className={`text-xs font-light ${isDarkMode ? 'text-slate-600' : 'text-gray-400'}`}>{new Date(player.lastModified || player.id).toLocaleDateString()}</span>
                                 </div>
                             </div>
                         </div>
@@ -1064,8 +1064,8 @@ export default function App() {
                     <div className="flex items-center gap-4">
                         <div className="bg-gradient-to-br from-cyan-400 via-sky-500 to-indigo-600 p-2.5 rounded-xl shadow-lg shadow-sky-500/30 ring-1 ring-white/30"><Calculator size={24} className="text-white" /></div>
                         <div>
-                            <h1 className={`text-xl font-bold tracking-tight font-kanit ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>ระบบคำนวนอัพสเตตัสนักเตะ</h1>
-                            <p className={`text-xs font-kanit flex items-center gap-1.5 ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Player development studio</p>
+                            <h1 className={`text-2xl font-bold tracking-tight font-kanit ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>ระบบคำนวนอัพสเตตัสนักเตะ</h1>
+                            <p className={`text-sm font-kanit flex items-center gap-1.5 ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Player development studio</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
@@ -1090,13 +1090,13 @@ export default function App() {
                     <div className="relative flex flex-col gap-2">
                         <span className="w-fit rounded-full bg-cyan-400/15 px-3 py-1 text-[10px] font-bold tracking-[0.18em] text-cyan-500">PLAYER LAB · TC OPTIMIZER</span>
                         <h2 className={`text-2xl md:text-3xl font-bold font-kanit ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>สร้างนักเตะในแบบที่คุณต้องการ</h2>
-                        <p className={`text-sm font-kanit ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>เลือกตำแหน่ง กรอกค่าพลัง แล้วให้ระบบช่วยวางแผน TC ที่คุ้มค่าที่สุด</p>
+                        <p className={`text-base font-kanit ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>เลือกตำแหน่ง กรอกค่าพลัง แล้วให้ระบบช่วยวางแผน TC ที่คุ้มค่าที่สุด</p>
                     </div>
                 </section>
-                <div className="grid md:grid-cols-12 gap-8">
-                    <div className="md:col-span-3">
-                        <div className={`p-5 rounded-3xl border backdrop-blur-md sticky top-24 shadow-xl transition-colors ${isDarkMode ? 'bg-slate-800/30 border-white/5' : 'bg-white/60 border-white shadow-indigo-100/50'}`}>
-                            <h2 className={`text-sm font-bold mb-5 flex items-center gap-2.5 font-kanit ${isDarkMode ? 'text-slate-200' : 'text-gray-800'}`}>
+                <div className="grid lg:grid-cols-12 gap-8">
+                    <div className="lg:col-span-3">
+                        <div className={`p-5 rounded-3xl border backdrop-blur-md lg:sticky lg:top-24 shadow-xl transition-colors ${isDarkMode ? 'bg-slate-800/30 border-white/5' : 'bg-white/60 border-white shadow-indigo-100/50'}`}>
+                            <h2 className={`text-base font-bold mb-5 flex items-center gap-2.5 font-kanit ${isDarkMode ? 'text-slate-200' : 'text-gray-800'}`}>
                                 <div className={`p-1.5 rounded-lg ${isDarkMode ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-100 text-emerald-600'}`}><Target size={18} /></div>
                                 เลือกตำแหน่ง
                             </h2>
@@ -1104,7 +1104,7 @@ export default function App() {
                         </div>
                     </div>
 
-                    <div className="md:col-span-6">
+                    <div className="lg:col-span-6">
                         <div className={`p-6 rounded-3xl border backdrop-blur-md shadow-xl min-h-[600px] transition-colors ${isDarkMode ? 'bg-slate-800/30 border-white/5' : 'bg-white/60 border-white shadow-indigo-100/50'}`}>
                             <div className={`mb-6 p-4 rounded-2xl border flex items-center gap-3 transition-colors ${isDarkMode ? 'bg-slate-900/50 border-white/5' : 'bg-white border-gray-200 shadow-sm'}`}>
                                 <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-indigo-500/20 text-indigo-400' : 'bg-indigo-100 text-indigo-600'}`}><PenLine size={20} /></div>
@@ -1130,14 +1130,14 @@ export default function App() {
                                         {selectedPosition} Stats
                                     </h2>
                                     <div className="flex items-center gap-3 mt-2 ml-1">
-                                        <span className={`text-[10px] px-3 py-1 rounded-full font-kanit border flex items-center gap-2 ${isDarkMode ? 'bg-black/30 text-slate-400 border-white/5' : 'bg-gray-100 text-gray-500 border-gray-200'}`}>
+                                        <span className={`text-xs px-3 py-1 rounded-full font-kanit border flex items-center gap-2 ${isDarkMode ? 'bg-black/30 text-slate-400 border-white/5' : 'bg-gray-100 text-gray-500 border-gray-200'}`}>
                                             TC Used: 
                                             <div className="flex gap-0.5">{[...Array(5)].map((_, i) => (<div key={i} className={`w-1.5 h-1.5 rounded-full ${i < tcCount ? 'bg-indigo-500' : (isDarkMode ? 'bg-slate-700' : 'bg-gray-300')}`} />))}</div>
                                             <span className="text-indigo-500">{tcCount}/5</span>
                                         </span>
                                     </div>
                                 </div>
-                                <button onClick={toggleSortOrder} className={`flex items-center gap-2 px-4 py-2 text-xs rounded-xl transition-colors border font-kanit ${isDarkMode ? 'bg-slate-800/50 hover:bg-slate-800 border-slate-700 text-slate-300' : 'bg-white hover:bg-gray-50 border-gray-200 text-gray-600 shadow-sm'}`}>
+                                <button onClick={toggleSortOrder} className={`flex items-center gap-2 px-4 py-2 text-sm rounded-xl transition-colors border font-kanit ${isDarkMode ? 'bg-slate-800/50 hover:bg-slate-800 border-slate-700 text-slate-300' : 'bg-white hover:bg-gray-50 border-gray-200 text-gray-600 shadow-sm'}`}>
                                     <ArrowUpDown size={14} />{sortOrder === 'default' ? 'เรียงตามเกม' : 'เรียงตามความสำคัญ'}
                                 </button>
                             </div>
@@ -1146,8 +1146,8 @@ export default function App() {
                         </div>
                     </div>
 
-                    <div className="md:col-span-3 space-y-6">
-                        <div className="sticky top-24 space-y-6">
+                    <div className="lg:col-span-3 space-y-6">
+                        <div className="lg:sticky lg:top-24 space-y-6">
                             <ResultDisplay calculatedValue={calculatedValue} position={selectedPosition} topFactors={topFactors} strategies={strategies} activeStrategyId={activeStrategyId} onSelectStrategy={setActiveStrategyId} onApplyStrategy={applyActiveStrategy} playerName={playerName} archetype={archetype} radarStats={radarStats} isDarkMode={isDarkMode} />
                             <SavedPlayersList savedPlayers={savedPlayers} onLoad={handleLoadPlayer} onDelete={handleDeletePlayer} onCompare={handleCompare} activePlayerId={activePlayerId} isDarkMode={isDarkMode} />
                         </div>
