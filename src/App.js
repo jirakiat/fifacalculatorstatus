@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
     User, Activity, Shield, Target, Calculator, RefreshCw, ArrowUpDown, Zap, CheckCircle2, Flame, Crosshair, TrendingUp, Wind, Dna,
-    Goal, MapPin, CircleDot, ArrowBigUp, Lightbulb, Move, ArrowRightLeft, Rocket, Eye, CornerUpRight, Scissors, Footprints, Lock, Battery, ChevronsDown, Hand, Send, Sparkles, Save, Trash2, FolderOpen, PenLine, AlertCircle, FilePlus, ChevronRight, Eraser, GitCompare, X, Bell, Hexagon, Moon, Sun
+    Goal, MapPin, CircleDot, ArrowBigUp, Lightbulb, Move, ArrowRightLeft, Rocket, Eye, CornerUpRight, Scissors, Footprints, Lock, Battery, ChevronsDown, Hand, Send, Sparkles, Save, Trash2, FolderOpen, PenLine, AlertCircle, FilePlus, ChevronRight, Eraser, GitCompare, X, Bell, Hexagon, Moon, Sun, Search, Plus, Minus
 } from 'lucide-react';
 
 // --- Configuration Data ---
@@ -336,6 +336,8 @@ const RadarChart = ({ stats, size = 200, color = "#10b981", isDarkMode }) => {
 
 // --- Sub-Components ---
 
+const ALL_POSITIONS = ['ST', 'CF', 'LW/RW', 'LM/RM', 'CAM', 'CM', 'CDM', 'LWB/RWB', 'LB/RB', 'CB', 'GK'];
+
 const PositionSelector = ({ selectedPosition, onSelectPosition, isDarkMode }) => {
     const positionGroups = [
         { title: 'กองหน้า', positions: ['ST', 'CF'] },
@@ -346,7 +348,31 @@ const PositionSelector = ({ selectedPosition, onSelectPosition, isDarkMode }) =>
     ];
 
     return (
-        <div className="space-y-5">
+        <div>
+            {/* Mobile quick-select: horizontal scroll chips, saves vertical space on small screens */}
+            <div className="flex md:hidden gap-2 overflow-x-auto pb-1 -mx-1 px-1 custom-scrollbar">
+                {ALL_POSITIONS.map((pos) => {
+                    const isSelected = selectedPosition === pos;
+                    return (
+                        <button
+                            key={pos}
+                            onClick={() => onSelectPosition(pos)}
+                            className={`flex-shrink-0 px-3.5 py-2 text-xs rounded-full border font-bold font-kanit transition-all whitespace-nowrap
+                                ${isSelected
+                                    ? 'text-white border-transparent shadow-md shadow-black/20'
+                                    : isDarkMode
+                                        ? 'bg-slate-800/60 border-slate-700/60 text-slate-400'
+                                        : 'bg-white border-gray-200 text-gray-500'
+                                }`}
+                            style={isSelected ? { background: `linear-gradient(135deg, ${positionColors[pos]} 0%, ${isDarkMode ? '#1e293b' : '#64748b'} 100%)` } : {}}
+                        >
+                            {pos}
+                        </button>
+                    );
+                })}
+            </div>
+
+            <div className="hidden md:block space-y-5">
             {positionGroups.map((group) => (
                 <div key={group.title}>
                     <h3 className={`text-xs font-medium mb-2.5 uppercase tracking-wider pl-1 font-kanit flex items-center gap-2 ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>
@@ -380,17 +406,33 @@ const PositionSelector = ({ selectedPosition, onSelectPosition, isDarkMode }) =>
                     </div>
                 </div>
             ))}
+            </div>
         </div>
     );
 };
 
-const InputForm = ({ players, inputs, tcState, onInputChange, onTCToggle, tcCount, onReset, isDarkMode }) => {
+const InputForm = ({ players, inputs, tcState, onInputChange, onTCToggle, tcCount, onReset, onStep, searchValue, onSearchChange, isDarkMode }) => {
     return (
         <div>
-            <div className="flex justify-end mb-4">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-4">
+                <div className="relative flex-1">
+                    <Search size={15} className={`absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none ${isDarkMode ? 'text-slate-500' : 'text-gray-400'}`} />
+                    <input
+                        type="text"
+                        value={searchValue}
+                        onChange={onSearchChange}
+                        placeholder="ค้นหาค่าพลัง เช่น ความเร็ว..."
+                        aria-label="ค้นหาค่าพลัง"
+                        className={`w-full pl-9 pr-3 py-2 rounded-lg text-sm font-kanit outline-none border transition-all focus:ring-2
+                            ${isDarkMode
+                                ? 'bg-slate-900/60 border-slate-700/70 text-white placeholder-slate-500 focus:ring-indigo-500/40 focus:border-indigo-500/50'
+                                : 'bg-white border-gray-200 text-gray-800 placeholder-gray-400 focus:ring-indigo-200 focus:border-indigo-400'
+                            }`}
+                    />
+                </div>
                 <button 
                     onClick={onReset}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-kanit transition-all border
+                    className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-kanit transition-all border whitespace-nowrap
                         ${isDarkMode 
                             ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20 border-red-500/20' 
                             : 'bg-red-50 text-red-600 hover:bg-red-100 border-red-100'
@@ -399,6 +441,11 @@ const InputForm = ({ players, inputs, tcState, onInputChange, onTCToggle, tcCoun
                     <Eraser size={14} /> ล้างค่าพลัง
                 </button>
             </div>
+            {players.length === 0 ? (
+                <div className={`text-center py-12 rounded-xl border font-kanit text-sm ${isDarkMode ? 'text-slate-500 border-slate-700/50 bg-slate-900/20' : 'text-gray-400 border-gray-200 bg-gray-50'}`}>
+                    ไม่พบค่าพลังที่ตรงกับคำค้นหา "{searchValue}"
+                </div>
+            ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {players.map((player) => {
                     const isTCActive = tcState[player.key];
@@ -435,7 +482,17 @@ const InputForm = ({ players, inputs, tcState, onInputChange, onTCToggle, tcCoun
                                     {player.value}%
                                 </span>
                             </div>
-                            <div className="flex items-center gap-2 mt-0.5">
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                                <button
+                                    type="button"
+                                    tabIndex={-1}
+                                    onClick={() => onStep(player.key, -1)}
+                                    aria-label={`ลดค่าพลัง ${player.key}`}
+                                    className={`flex-shrink-0 w-7 h-[34px] rounded-lg flex items-center justify-center transition-colors border
+                                        ${isDarkMode ? 'bg-slate-800/60 border-slate-700/80 text-slate-400 hover:bg-slate-700 hover:text-white' : 'bg-white border-gray-200 text-gray-400 hover:bg-gray-50 hover:text-gray-700'}`}
+                                >
+                                    <Minus size={13} />
+                                </button>
                                 <div className="relative flex-1">
                                     <input 
                                         type="number" 
@@ -460,6 +517,16 @@ const InputForm = ({ players, inputs, tcState, onInputChange, onTCToggle, tcCoun
                                         </div>
                                     )}
                                 </div>
+                                <button
+                                    type="button"
+                                    tabIndex={-1}
+                                    onClick={() => onStep(player.key, 1)}
+                                    aria-label={`เพิ่มค่าพลัง ${player.key}`}
+                                    className={`flex-shrink-0 w-7 h-[34px] rounded-lg flex items-center justify-center transition-colors border
+                                        ${isDarkMode ? 'bg-slate-800/60 border-slate-700/80 text-slate-400 hover:bg-slate-700 hover:text-white' : 'bg-white border-gray-200 text-gray-400 hover:bg-gray-50 hover:text-gray-700'}`}
+                                >
+                                    <Plus size={13} />
+                                </button>
                                 <button 
                                     type="button" 
                                     tabIndex={-1} 
@@ -481,6 +548,7 @@ const InputForm = ({ players, inputs, tcState, onInputChange, onTCToggle, tcCoun
                     );
                 })}
             </div>
+            )}
         </div>
     );
 };
@@ -495,6 +563,16 @@ const ResultDisplay = ({ calculatedValue, position, topFactors, strategies, acti
 
     return (
         <div className="space-y-6">
+            {calculatedValue <= 0 ? (
+                <div className={`flex flex-col items-center justify-center gap-3 p-10 rounded-3xl border backdrop-blur-md text-center
+                    ${isDarkMode ? 'bg-slate-800/30 border-white/5' : 'bg-white/60 border-white shadow-xl shadow-indigo-100/50'}`}>
+                    <div className={`p-4 rounded-full ${isDarkMode ? 'bg-indigo-500/10 text-indigo-400' : 'bg-indigo-100 text-indigo-600'}`}>
+                        <Target size={26} />
+                    </div>
+                    <h3 className={`text-sm font-bold font-kanit ${isDarkMode ? 'text-slate-200' : 'text-gray-800'}`}>เริ่มกรอกค่าพลังนักเตะ</h3>
+                    <p className={`text-xs font-kanit leading-relaxed max-w-[220px] ${isDarkMode ? 'text-slate-500' : 'text-gray-500'}`}>กรอกค่าพลังทางด้านซ้ายเพื่อดู Rating การ์ดนักเตะและคำแนะนำการอัพ TC ที่นี่</p>
+                </div>
+            ) : (
             <div className={`flex flex-col items-center justify-center p-6 rounded-3xl border backdrop-blur-md relative overflow-hidden group transition-colors
                 ${isDarkMode ? 'bg-slate-800/30 border-white/5' : 'bg-white/60 border-white shadow-xl shadow-indigo-100/50'}`}>
                 <div className="group-hover:scale-105 transition-transform duration-500">
@@ -515,6 +593,7 @@ const ResultDisplay = ({ calculatedValue, position, topFactors, strategies, acti
                     </div>
                 </div>
             </div>
+            )}
 
             <div className={`rounded-2xl p-5 backdrop-blur-md border transition-colors ${isDarkMode ? 'bg-slate-800/30 border-white/5' : 'bg-white/60 border-white shadow-lg shadow-indigo-50/50'}`}>
                 <div className="flex items-center gap-2.5 mb-4">
@@ -720,6 +799,7 @@ export default function App() {
     const [modalConfig, setModalConfig] = useState({ isOpen: false, type: 'alert', title: '', message: '', onConfirm: null, content: null });
     const [toasts, setToasts] = useState([]); 
     const [isDarkMode, setIsDarkMode] = useState(true); // New State: Theme
+    const [statSearch, setStatSearch] = useState('');
     const prevCalculatedValue = useRef(0); 
 
     useEffect(() => {
@@ -775,6 +855,7 @@ export default function App() {
         setSortOrder('default');
         setActiveStrategyId('max_rating');
         setActivePlayerId(null);
+        setStatSearch('');
         
         if (Object.keys(preservedInputs).length > 0) {
             // Optional: notify
@@ -799,6 +880,14 @@ export default function App() {
         const numericValue = Number(e.target.value);
         const safeValue = Number.isFinite(numericValue) ? Math.max(0, numericValue) : 0;
         setInputs((previousInputs) => ({ ...previousInputs, [e.target.name]: safeValue }));
+    };
+
+    const handleStep = (key, delta) => {
+        setInputs((previousInputs) => {
+            const currentValue = Number(previousInputs[key]) || 0;
+            const nextValue = Math.max(0, currentValue + delta);
+            return { ...previousInputs, [key]: nextValue };
+        });
     };
 
     const handleTCToggle = (key) => {
@@ -871,6 +960,7 @@ export default function App() {
             setTcState(player.tcState);
             setPlayerName(player.name);
             setActivePlayerId(player.id);
+            setStatSearch('');
             closeModal();
             addToast(`โหลดข้อมูล "${player.name}" เรียบร้อยแล้ว`);
         };
@@ -925,6 +1015,9 @@ export default function App() {
     } else {
         displayedPlayers.sort((a, b) => b.value - a.value);
     }
+    const filteredDisplayedPlayers = statSearch.trim()
+        ? displayedPlayers.filter(p => p.key.includes(statSearch.trim()))
+        : displayedPlayers;
     const topFactors = [...currentPlayers].sort((a, b) => b.value - a.value).slice(0, 5);
     const strategies = STRATEGY_DEFINITIONS.map(strategy => {
         let candidates = [];
@@ -976,6 +1069,13 @@ export default function App() {
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
+                        {calculatedValue > 0 && (
+                            <div className={`hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-full border font-kanit ${isDarkMode ? 'bg-slate-800/60 border-white/5' : 'bg-white border-gray-200 shadow-sm'}`}>
+                                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: positionColors[selectedPosition] }}></span>
+                                <span className={`text-[10px] uppercase tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>{selectedPosition}</span>
+                                <span className={`text-sm font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{calculatedValue.toFixed(2)}</span>
+                            </div>
+                        )}
                         <button onClick={toggleTheme} aria-label="สลับโหมดสี" className={`p-2.5 rounded-full transition-colors border ${isDarkMode ? 'bg-slate-800 hover:bg-slate-700 text-yellow-400 border-slate-700' : 'bg-white hover:bg-gray-100 text-slate-600 border-gray-200'}`}>
                             {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
                         </button>
@@ -1042,7 +1142,7 @@ export default function App() {
                                 </button>
                             </div>
                             
-                            <InputForm players={displayedPlayers} inputs={inputs} tcState={tcState} tcCount={tcCount} onInputChange={handleInputChange} onTCToggle={handleTCToggle} onReset={handleReset} isDarkMode={isDarkMode} />
+                            <InputForm players={filteredDisplayedPlayers} inputs={inputs} tcState={tcState} tcCount={tcCount} onInputChange={handleInputChange} onStep={handleStep} onTCToggle={handleTCToggle} onReset={handleReset} searchValue={statSearch} onSearchChange={(e) => setStatSearch(e.target.value)} isDarkMode={isDarkMode} />
                         </div>
                     </div>
 
