@@ -93,7 +93,7 @@ const calculateGroupStats = (inputs, tcState, position) => {
     const sho = shoParams.reduce((a, b) => a + getValue(b), 0) / shoParams.length;
     // PAS
     const pasParams = ['ส่งสั้น', 'ส่งไกล', 'เปิดบอล', 'อ่านเกม', 'อ่านเกมส์'];
-    const pas = pasParams.reduce((a, b) => a + getValue(b), 0) / 4; 
+    const pas = pasParams.reduce((sum, key) => sum + getValue(key), 0) / pasParams.length;
     // DRI
     const driParams = ['เลี้ยงบอล', 'ควบคุมบอล', 'คล่องตัว', 'ปฏิกิริยา'];
     const dri = driParams.reduce((a, b) => a + getValue(b), 0) / driParams.length;
@@ -116,7 +116,7 @@ const calculateGroupStats = (inputs, tcState, position) => {
 
 // --- Archetype Logic ---
 const getArchetype = (inputs, tcState) => {
-    const getValue = (key) => (inputs[key] || 0) + (tcState[key] ? 2 : 0);
+    const getValue = (key) => (Number(inputs[key]) || 0) + (tcState[key] ? 2 : 0);
     
     const speed = Math.max(getValue("ความเร็ว"), getValue("สปีดต้น"));
     const shooting = Math.max(getValue("จบสกอร์"), getValue("พลังการยิง"), getValue("ยิงไกล"));
@@ -157,9 +157,9 @@ const PlayerCard = ({ rating, position, name, archetype, small = false }) => {
     const nameSize = small ? "text-xs" : "text-lg";
 
     return (
-        <div className={`relative ${sizeClasses} bg-gradient-to-br ${cardColor} border-2 shadow-2xl flex flex-col items-center pt-4 text-white overflow-hidden transform transition-all duration-500`}>
-            <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] mix-blend-overlay"></div>
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+        <div className={`group relative ${sizeClasses} bg-gradient-to-br ${cardColor} border-2 shadow-2xl flex flex-col items-center pt-4 text-white overflow-hidden transform transition-all duration-500 hover:-translate-y-1 hover:shadow-indigo-500/30`}>
+            <div className="absolute inset-0 opacity-25 bg-[linear-gradient(90deg,transparent_49%,rgba(255,255,255,0.35)_50%,transparent_51%),linear-gradient(rgba(255,255,255,0.12)_1px,transparent_1px)] bg-[size:34px_34px]"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/10 to-white/10"></div>
             <div className="absolute -inset-full top-0 block h-full w-1/2 -skew-x-12 bg-gradient-to-r from-transparent to-white opacity-10 group-hover:animate-shine" />
             
             {/* Sparkle effect for high rating */}
@@ -175,7 +175,7 @@ const PlayerCard = ({ rating, position, name, archetype, small = false }) => {
                 <span className={`${textPos} font-bold uppercase tracking-widest mt-1 opacity-90 font-kanit text-shadow`}>{position || 'POS'}</span>
             </div>
             
-            <div className={`mt-2 ${small ? 'w-16 h-16' : 'w-24 h-24'} bg-black/40 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/10 z-10 shadow-inner`}>
+            <div className={`mt-2 ${small ? 'w-16 h-16' : 'w-24 h-24'} bg-slate-950/35 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/20 z-10 shadow-inner ring-4 ring-white/5`}>
                 <User size={iconSize} className="text-white/80" />
             </div>
             
@@ -444,6 +444,7 @@ const InputForm = ({ players, inputs, tcState, onInputChange, onTCToggle, tcCoun
                                         name={player.key} 
                                         value={inputs[player.key] || ''} 
                                         onChange={onInputChange} 
+                                        aria-label={`ค่าพลัง ${player.key}`}
                                         className={`w-full border text-center rounded-lg py-1.5 outline-none font-mono text-sm transition-all shadow-inner focus:ring-2 
                                             ${isDarkMode 
                                                 ? 'bg-slate-900/80 text-white focus:ring-indigo-500/50 focus:border-indigo-500/50 border-slate-700/80 group-hover:border-slate-600' 
@@ -464,6 +465,7 @@ const InputForm = ({ players, inputs, tcState, onInputChange, onTCToggle, tcCoun
                                     tabIndex={-1} 
                                     onClick={() => canActivate && onTCToggle(player.key)} 
                                     disabled={!canActivate} 
+                                    aria-label={`${isTCActive ? 'ยกเลิก' : 'เพิ่ม'} TC สำหรับ ${player.key}`}
                                     className={`relative w-12 h-[34px] rounded-lg flex items-center justify-center transition-all duration-300 outline-none focus:ring-0 border
                                         ${isTCActive 
                                             ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 scale-105 border-transparent' 
@@ -794,9 +796,9 @@ export default function App() {
     };
 
     const handleInputChange = (e) => {
-        let val = Number(e.target.value);
-        // if (val > 99) val = 99; // Removed max cap logic
-        setInputs({ ...inputs, [e.target.name]: Math.max(0, val) });
+        const numericValue = Number(e.target.value);
+        const safeValue = Number.isFinite(numericValue) ? Math.max(0, numericValue) : 0;
+        setInputs((previousInputs) => ({ ...previousInputs, [e.target.name]: safeValue }));
     };
 
     const handleTCToggle = (key) => {
@@ -826,7 +828,7 @@ export default function App() {
     const toggleSortOrder = () => setSortOrder(prev => prev === 'default' ? 'value' : 'default');
 
     const showModal = (config) => setModalConfig({ isOpen: true, ...config });
-    const closeModal = () => setModalConfig({ ...modalConfig, isOpen: false, content: null });
+    const closeModal = () => setModalConfig((previousConfig) => ({ ...previousConfig, isOpen: false, content: null }));
 
     const handleSavePlayer = () => {
         if (!playerName.trim()) {
@@ -964,25 +966,33 @@ export default function App() {
             <Modal isOpen={modalConfig.isOpen} type={modalConfig.type} title={modalConfig.title} message={modalConfig.message} onConfirm={modalConfig.onConfirm} onCancel={modalConfig.onCancel} content={modalConfig.content} isDarkMode={isDarkMode} />
             <ToastContainer toasts={toasts} removeToast={removeToast} isDarkMode={isDarkMode} />
 
-            <header className={`sticky top-0 z-20 backdrop-blur-xl border-b transition-colors ${isDarkMode ? 'bg-slate-900/80 border-slate-800' : 'bg-white/80 border-gray-200'}`}>
+            <header className={`sticky top-0 z-20 backdrop-blur-xl border-b transition-colors ${isDarkMode ? 'bg-slate-950/80 border-cyan-400/10' : 'bg-white/80 border-indigo-100'}`}>
                 <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <div className="bg-indigo-600 p-2.5 rounded-xl shadow-lg shadow-indigo-600/20"><Calculator size={24} className="text-white" /></div>
+                        <div className="bg-gradient-to-br from-cyan-400 via-sky-500 to-indigo-600 p-2.5 rounded-xl shadow-lg shadow-sky-500/30 ring-1 ring-white/30"><Calculator size={24} className="text-white" /></div>
                         <div>
                             <h1 className={`text-xl font-bold tracking-tight font-kanit ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>ระบบคำนวนอัพสเตตัสนักเตะ</h1>
-                            <p className={`text-xs font-kanit ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>Dev by Jiw Jirakiat</p>
+                            <p className={`text-xs font-kanit flex items-center gap-1.5 ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Player development studio</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
-                        <button onClick={toggleTheme} className={`p-2.5 rounded-full transition-colors border ${isDarkMode ? 'bg-slate-800 hover:bg-slate-700 text-yellow-400 border-slate-700' : 'bg-white hover:bg-gray-100 text-slate-600 border-gray-200'}`}>
+                        <button onClick={toggleTheme} aria-label="สลับโหมดสี" className={`p-2.5 rounded-full transition-colors border ${isDarkMode ? 'bg-slate-800 hover:bg-slate-700 text-yellow-400 border-slate-700' : 'bg-white hover:bg-gray-100 text-slate-600 border-gray-200'}`}>
                             {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
                         </button>
-                        <button onClick={() => window.location.reload()} className={`p-2.5 rounded-full transition-colors border ${isDarkMode ? 'bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white border-slate-700' : 'bg-white hover:bg-gray-100 text-gray-500 hover:text-gray-800 border-gray-200'}`}><RefreshCw size={20} /></button>
+                        <button onClick={() => window.location.reload()} aria-label="รีเฟรชแอปพลิเคชัน" className={`p-2.5 rounded-full transition-colors border ${isDarkMode ? 'bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white border-slate-700' : 'bg-white hover:bg-gray-100 text-gray-500 hover:text-gray-800 border-gray-200'}`}><RefreshCw size={20} /></button>
                     </div>
                 </div>
             </header>
 
             <main className="max-w-7xl mx-auto px-4 md:px-6 py-8">
+                <section className={`mb-7 overflow-hidden rounded-3xl border p-5 md:p-6 relative ${isDarkMode ? 'bg-gradient-to-r from-cyan-500/10 via-indigo-500/10 to-transparent border-cyan-400/15' : 'bg-gradient-to-r from-cyan-50 via-indigo-50 to-white border-indigo-100 shadow-sm'}`}>
+                    <div className="absolute -right-10 -top-16 w-48 h-48 rounded-full bg-cyan-400/15 blur-3xl"></div>
+                    <div className="relative flex flex-col gap-2">
+                        <span className="w-fit rounded-full bg-cyan-400/15 px-3 py-1 text-[10px] font-bold tracking-[0.18em] text-cyan-500">PLAYER LAB · TC OPTIMIZER</span>
+                        <h2 className={`text-2xl md:text-3xl font-bold font-kanit ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>สร้างนักเตะในแบบที่คุณต้องการ</h2>
+                        <p className={`text-sm font-kanit ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>เลือกตำแหน่ง กรอกค่าพลัง แล้วให้ระบบช่วยวางแผน TC ที่คุ้มค่าที่สุด</p>
+                    </div>
+                </section>
                 <div className="grid md:grid-cols-12 gap-8">
                     <div className="md:col-span-3">
                         <div className={`p-5 rounded-3xl border backdrop-blur-md sticky top-24 shadow-xl transition-colors ${isDarkMode ? 'bg-slate-800/30 border-white/5' : 'bg-white/60 border-white shadow-indigo-100/50'}`}>
